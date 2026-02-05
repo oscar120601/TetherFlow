@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "PackageStructure": ["<PackageStructure>"]
+  "TetherFlowSimple-arm64-apple-macosx26.0-debug.exe": ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.exe>"]
+  "TetherFlowSimple-arm64-apple-macosx26.0-debug.module": ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.module>"]
+  "main": ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.exe>","<TetherFlowSimple-arm64-apple-macosx26.0-debug.module>"]
+  "test": ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.exe>","<TetherFlowSimple-arm64-apple-macosx26.0-debug.module>"]
+default: "main"
+nodes:
+  "/Users/chanoscar/TetherFlow/TetherFlowSimple/Sources/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple":
+    is-mutated: true
+commands:
+  "/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple-entitlement.plist"]
+    description: "Write auxiliary file /Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple-entitlement.plist"
+
+  "/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/chanoscar/TetherFlow/TetherFlowSimple/Sources/main.swift"]
+    outputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/sources"]
+    description: "Write auxiliary file /Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/sources"
+
+  "/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/main.swift.o"]
+    outputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.product/Objects.LinkFileList"
+
+  "/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc"]
+    outputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt"
+
+  "<TetherFlowSimple-arm64-apple-macosx26.0-debug.exe>":
+    tool: phony
+    inputs: ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    outputs: ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.exe>"]
+
+  "<TetherFlowSimple-arm64-apple-macosx26.0-debug.module>":
+    tool: phony
+    inputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/main.swift.o","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/Modules/TetherFlowSimple.swiftmodule"]
+    outputs: ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.module>"]
+
+  "C.TetherFlowSimple-arm64-apple-macosx26.0-debug.exe":
+    tool: shell
+    inputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/main.swift.o","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.product/Objects.LinkFileList"]
+    outputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/TetherFlowSimple"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-L","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug","-o","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple","-module-name","TetherFlowSimple","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_TetherFlowSimple_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx13.0","-Xlinker","-add_ast_path","-Xlinker","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/Modules/TetherFlowSimple.swiftmodule","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g"]
+
+  "C.TetherFlowSimple-arm64-apple-macosx26.0-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple-entitlement.plist"]
+    outputs: ["<TetherFlowSimple-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/TetherFlowSimple"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple-entitlement.plist","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple"]
+
+  "C.TetherFlowSimple-arm64-apple-macosx26.0-debug.module":
+    tool: shell
+    inputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/Sources/main.swift","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/swift-version--58304C5D6DBC2206.txt","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/sources"]
+    outputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/main.swift.o","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/Modules/TetherFlowSimple.swiftmodule"]
+    description: "Compiling Swift Module 'TetherFlowSimple' (1 sources)"
+    args: ["/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc","-module-name","TetherFlowSimple","-emit-dependencies","-emit-module","-emit-module-path","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/Modules/TetherFlowSimple.swiftmodule","-output-file-map","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/output-file-map.json","-incremental","-c","@/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/TetherFlowSimple.build/sources","-I","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx13.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j14","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/chanoscar/TetherFlow/TetherFlowSimple/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","TetherFlowSimple_main","-parse-as-library","-swift-version","5","-plugin-path","/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins/testing","-sdk","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-F","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-I","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-L","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib","-g","-Xcc","-isysroot","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks","-Xcc","-F","-Xcc","/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/PrivateFrameworks","-Xcc","-fPIC","-Xcc","-g","-package-name","tetherflowsimple"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/chanoscar/TetherFlow/TetherFlowSimple/Sources/","/Users/chanoscar/TetherFlow/TetherFlowSimple/Package.swift","/Users/chanoscar/TetherFlow/TetherFlowSimple/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

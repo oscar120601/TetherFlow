@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TetherFlow - 網路偽裝控制面板</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- 側邊欄 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <span class="logo-text">TetherFlow</span>
+            </div>
+            
+            <nav class="nav">
+                <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">儀表板</span>
+                </a>
+                <a href="#profiles" class="nav-item" data-page="profiles">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">Profiles</span>
+                </a>
+                <a href="#history" class="nav-item" data-page="history">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-text">歷史記錄</span>
+                </a>
+                <a href="#settings" class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">設定</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>v2.0 Web Edition</p>
+            </div>
+        </aside>
+        
+        <!-- 主內容區 -->
+        <main class="main-content">
+            <!-- 頂部欄 -->
+            <header class="header">
+                <h1 class="page-title">儀表板</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="refreshAll()">
+                        🔄 重新整理
+                    </button>
+                </div>
+            </header>
+            
+            <!-- 儀表板頁面 -->
+            <div id="page-dashboard" class="page active">
+                <!-- 狀態卡片 -->
+                <div class="status-cards">
+                    <div class="status-card">
+                        <div class="status-icon">🔢</div>
+                        <div class="status-info">
+                            <span class="status-label">TTL 值</span>
+                            <span class="status-value" id="ttl-value">--</span>
+                        </div>
+                        <div class="status-badge" id="ttl-badge">檢測中</div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="status-icon">📦</div>
+                        <div class="status-info">
+                            <span class="status-label">MTU 值</span>
+                            <span class="status-value" id="mtu-value">--</span>
+                        </div>
+                        <div class="status-badge" id="mtu-badge">檢測中</div>
+                    </div>
+                    
+                    <div class="status-card status-main">
+                        <div class="status-icon">🛡️</div>
+                        <div class="status-info">
+                            <span class="status-label">偽裝狀態</span>
+                            <span class="status-value" id="cloak-status">檢測中</span>
+                        </div>
+                        <div class="status-badge" id="cloak-badge">--</div>
+                    </div>
+                </div>
+                
+                <!-- 密碼設定區 -->
+                <div class="card password-card" id="password-card">
+                    <div class="card-header">
+                        <h3>🔐 管理員密碼</h3>
+                        <span class="password-status" id="password-status">未設定</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="password-desc">為了修改系統網路設定，需要您的 Mac 登入密碼。密碼僅儲存在記憶體中，不會儲存到硬碟。</p>
+                        <div class="password-form">
+                            <div class="input-group">
+                                <input type="password" id="password-input" placeholder="輸入您的 Mac 密碼...">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="show-password" onchange="togglePassword()">
+                                    <span>顯示密碼</span>
+                                </label>
+                            </div>
+                            <div class="password-actions">
+                                <button class="btn btn-primary" onclick="savePassword()">
+                                    💾 儲存密碼
+                                </button>
+                                <button class="btn btn-secondary" onclick="clearPassword()" id="btn-clear-pwd" style="display:none;">
+                                    🗑️ 清除密碼
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 控制按鈕 -->
+                <div class="card control-card">
+                    <div class="card-header">
+                        <h3>🎮 快速控制</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="control-buttons">
+                            <button class="btn btn-start" id="btn-start" onclick="startCloaking()" disabled>
+                                <span class="btn-icon">🟢</span>
+                                <span class="btn-text">
+                                    <strong>啟動偽裝</strong>
+                                    <small>設定 TTL=65, MTU=1400</small>
+                                </span>
+                            </button>
+                            
+                            <button class="btn btn-stop" id="btn-stop" onclick="stopCloaking()" disabled>
+                                <span class="btn-icon">🔴</span>
+                                <span class="btn-text">
+                                    <strong>停止偽裝</strong>
+                                    <small>還原 TTL=64, MTU=1500</small>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profiles 頁面 -->
+            <div id="page-profiles" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Wi-Fi Profiles</h3>
+                        <button class="btn btn-primary" onclick="showAddProfileModal()">
+                            ➕ 新增 Profile
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="profiles-list" class="profiles-list">
+                            <div class="empty-state">
+                                <span class="empty-icon">📭</span>
+                                <p>尚無 Profiles</p>
+                                <p class="empty-hint">點擊「新增 Profile」建立您的第一個設定</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 歷史記錄頁面 -->
+            <div id="page-history" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📜 操作歷史</h3>
+                        <button class="btn btn-secondary" onclick="clearHistory()">
+                            🗑️ 清空
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="history-list" class="history-list">
+                            <div class="empty-state">
+                                <span class="empty-icon">📭</span>
+                                <p>尚無操作記錄</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 設定頁面 -->
+            <div id="page-settings" class="page">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>⚙️ 系統設定</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-name">自動重新整理</span>
+                                <span class="setting-desc">每 5 秒自動更新狀態</span>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="auto-refresh" checked onchange="toggleAutoRefresh()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-name">深色模式</span>
+                                <span class="setting-desc">切換深色主題</span>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>ℹ️ 關於</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="about-info">
+                            <p><strong>TetherFlow v2.0</strong></p>
+                            <p>Web-based network cloaking utility for macOS</p>
+                            <p>讓您的 MacBook 網路流量看起來像來自移動設備</p>
+                            <br>
+                            <p>功能特性：</p>
+                            <ul>
+                                <li>✅ 即時 TTL/MTU 狀態監控</li>
+                                <li>✅ 一鍵啟動/停止偽裝</li>
+                                <li>✅ Profile 管理系統</li>
+                                <li>✅ 操作歷史記錄</li>
+                                <li>✅ 響應式 Web 介面</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Toast 通知 -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- Modal: 新增/編輯 Profile -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">新增 Profile</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="profile-id">
+                <div class="form-group">
+                    <label>名稱</label>
+                    <input type="text" id="profile-name" placeholder="例如：手機熱點">
+                </div>
+                <div class="form-group">
+                    <label>Wi-Fi SSID</label>
+                    <input type="text" id="profile-ssid" placeholder="例如：MyHotspot5G">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>TTL 值</label>
+                        <input type="number" id="profile-ttl" value="65" min="1" max="255">
+                    </div>
+                    <div class="form-group">
+                        <label>MTU 值</label>
+                        <input type="number" id="profile-mtu" value="1400" min="1000" max="1500">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox">
+                        <input type="checkbox" id="profile-auto">
+                        <span>連線時自動啟動偽裝</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveProfile()">儲存</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
