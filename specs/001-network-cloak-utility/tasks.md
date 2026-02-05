@@ -46,7 +46,7 @@
 - [ ] T012 Implement `TetherFlowHelper/Helper.m` with protocol method stubs
 - [ ] T013 Implement `TetherFlow/Services/XPCClient.swift` with connection management
 - [ ] T014 [P] Add code signing validation in helper tool
-- [ ] T015 Implement helper installation logic using SMJobBless in `TetherFlow/Services/HelperInstaller.swift`
+- [x] T015 Implement helper installation logic using SMJobBless in `TetherFlow/Services/HelperInstaller.swift`
 
 ### Network Modification Foundation (C Layer)
 
@@ -60,8 +60,8 @@
 - [ ] T020 [P] Implement `TetherFlow/Models/HotspotProfile.swift` with Codable conformance
 - [ ] T021 [P] Implement `TetherFlow/Models/AppState.swift` with ObservableObject
 - [ ] T022 [P] Implement `TetherFlow/Models/NetworkMetrics.swift` for real-time metrics
-- [ ] T023 [P] Implement `TetherFlow/Models/SafetyThreshold.swift` with threshold logic
-- [ ] T024 Create `TetherFlow/Utils/Logger.swift` for unified logging
+- [x] T023 [P] Implement `TetherFlow/Models/SafetyThreshold.swift` with threshold logic
+- [x] T024 Create `TetherFlow/Utils/Logger.swift` for unified logging
 
 ### Persistence Layer
 
@@ -80,34 +80,34 @@
 
 ### Tests for User Story 1 (Optional - if TDD requested)
 
-- [ ] T027 [P] [US1] Create unit tests for HotspotProfile validation in `TetherFlowTests/HotspotProfileTests.swift`
-- [ ] T028 [P] [US1] Create unit tests for ProfileStore persistence in `TetherFlowTests/ProfileStoreTests.swift`
+- [x] T027 [P] [US1] Create unit tests for HotspotProfile validation in `TetherFlowTests/HotspotProfileTests.swift`
+- [x] T028 [P] [US1] Create unit tests for ProfileStore persistence in `TetherFlowTests/ProfileStoreTests.swift`
 
 ### Implementation for User Story 1
 
 #### Wi-Fi Monitoring
 
-- [ ] T029 [US1] Implement `TetherFlow/Services/WiFiMonitor.swift` using CWWiFiClient
-- [ ] T030 [US1] Add SSID change detection with KVO observers
-- [ ] T031 [US1] Implement SSID matching logic against configured profiles
+- [x] T029 [US1] Implement `TetherFlow/Services/WiFiMonitor.swift` using CWWiFiClient
+- [x] T030 [US1] Add SSID change detection with KVO observers
+- [x] T031 [US1] Implement SSID matching logic against configured profiles
 
 #### UI: Profile Management
 
-- [ ] T032 [P] [US1] Create `TetherFlow/Views/ProfileListView.swift` for managing hotspot profiles
-- [ ] T033 [P] [US1] Create `TetherFlow/Views/AddProfileView.swift` for adding new profiles
-- [ ] T034 [P] [US1] Create `TetherFlow/Views/EditProfileView.swift` for editing profile settings
+- [x] T032 [P] [US1] Create `TetherFlow/Views/ProfileListView.swift` for managing hotspot profiles
+- [x] T033 [P] [US1] Create `TetherFlow/Views/AddProfileView.swift` for adding new profiles
+- [x] T034 [P] [US1] Create `TetherFlow/Views/EditProfileView.swift` for editing profile settings
 
 #### UI: Menu Bar
 
-- [ ] T035 [US1] Create `TetherFlow/Views/MenuBarView.swift` with status indicator
-- [ ] T036 [US1] Implement status icon states: gray (idle), green (cloaking active)
-- [ ] T037 [US1] Add profile selection dropdown to menu bar
+- [x] T035 [US1] Create `TetherFlow/Views/MenuBarView.swift` with status indicator
+- [x] T036 [US1] Implement status icon states: gray (idle), green (cloaking active)
+- [x] T037 [US1] Add profile selection dropdown to menu bar
 
 #### Logic: Profile Management
 
-- [ ] T038 [US1] Implement add profile flow with validation
-- [ ] T039 [US1] Implement edit profile flow
-- [ ] T040 [US1] Implement delete profile with confirmation
+- [x] T038 [US1] Implement add profile flow with validation
+- [x] T039 [US1] Implement edit profile flow
+- [x] T040 [US1] Implement delete profile with confirmation
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -121,37 +121,37 @@
 
 ### Tests for User Story 2 (Optional)
 
-- [ ] T041 [P] [US2] Create unit tests for XPC communication in `IntegrationTests/XPCCommunicationTests.swift`
-- [ ] T042 [P] [US2] Create tests for TTL modification in `TetherFlowTests/NetworkModifierTests.swift`
+- [x] T041 [P] [US2] Create unit tests for XPC communication in `IntegrationTests/XPCCommunicationTests.swift`
+- [x] T042 [P] [US2] Create tests for TTL modification in `TetherFlowTests/NetworkModifierTests.swift`
 
 ### Implementation for User Story 2
 
 #### XPC Protocol Implementation
 
-- [ ] T043 [US2] Implement `applyCloakingWithTTL:mtu:interface:withReply:` in `Helper.m`
-- [ ] T044 [US2] Wire up C sysctl wrapper for TTL modification
-- [ ] T045 [US2] Implement MTU modification via networksetup in helper
-- [ ] T046 [US2] Implement `resetNetworkSettingsWithInterface:withReply:` for reversion
-- [ ] T047 [US2] Implement `getCurrentTTLWithReply:` for verification
+- [x] T043 [US2] Implement `applyCloakingWithTTL:mtu:interface:withReply:` in `Helper.m`
+- [x] T044 [US2] Wire up C sysctl wrapper for TTL modification
+- [x] T045 [US2] Implement MTU modification via networksetup in helper
+- [x] T046 [US2] Implement `resetNetworkSettingsWithInterface:withReply:` for reversion
+- [x] T047 [US2] Implement `getCurrentTTLWithReply:` for verification
 
 #### Network Configuration Service
 
-- [ ] T048 [US2] Implement `TetherFlow/Services/NetworkConfigurator.swift`
-- [ ] T049 [US2] Add cloaking activation logic (TTL=65, MTU=1400)
-- [ ] T050 [US2] Add cloaking deactivation logic (restore defaults)
-- [ ] T051 [US2] Implement verification methods to confirm settings applied
+- [x] T048 [US2] Implement `TetherFlow/Services/NetworkConfigurator.swift`
+- [x] T049 [US2] Add cloaking activation logic (TTL=65, MTU=1400)
+- [x] T050 [US2] Add cloaking deactivation logic (restore defaults)
+- [x] T051 [US2] Implement verification methods to confirm settings applied
 
 #### Cloaking Engine
 
-- [ ] T052 [US2] Create `TetherFlow/Services/CloakingEngine.swift` to coordinate activation
-- [ ] T053 [US2] Implement automatic cloaking trigger when matching SSID connected
-- [ ] T054 [US2] Implement status tracking and error handling
+- [x] T052 [US2] Create `TetherFlow/Services/CloakingEngine.swift` to coordinate activation
+- [x] T053 [US2] Implement automatic cloaking trigger when matching SSID connected
+- [x] T054 [US2] Implement status tracking and error handling
 
 #### Encrypted DNS
 
-- [ ] T055 [US2] Implement `TetherFlow/Services/DNSConfigurator.swift` for DoH/DoT
-- [ ] T056 [US2] Add Cloudflare and Quad9 DNS provider configurations
-- [ ] T057 [US2] Wire DNS configuration into cloaking activation flow
+- [x] T055 [US2] Implement `TetherFlow/Services/DNSConfigurator.swift` for DoH/DoT
+- [x] T056 [US2] Add Cloudflare and Quad9 DNS provider configurations
+- [x] T057 [US2] Wire DNS configuration into cloaking activation flow
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently (MVP complete!)
 
@@ -167,29 +167,29 @@
 
 #### Network Metrics Collection
 
-- [ ] T058 [P] [US3] Implement real-time bandwidth monitoring in `TetherFlow/Services/MetricsCollector.swift`
-- [ ] T059 [P] [US3] Add data usage tracking (upload/download bytes)
-- [ ] T060 [US3] Implement speed calculation with sampling
+- [x] T058 [P] [US3] Implement real-time bandwidth monitoring in `TetherFlow/Services/MetricsCollector.swift`
+- [x] T059 [P] [US3] Add data usage tracking (upload/download bytes)
+- [x] T060 [US3] Implement speed calculation with sampling
 
 #### Dashboard UI
 
-- [ ] T061 [P] [US3] Create `TetherFlow/Views/DashboardView.swift` with real-time metrics
-- [ ] T062 [P] [US3] Add upload/download speed display with graphs
-- [ ] T063 [P] [US3] Create data usage progress bars for hourly/daily thresholds
-- [ ] T064 [P] [US3] Add session statistics (duration, total transferred)
+- [x] T061 [P] [US3] Create `TetherFlow/Views/DashboardView.swift` with real-time metrics
+- [x] T062 [P] [US3] Add upload/download speed display with graphs
+- [x] T063 [P] [US3] Create data usage progress bars for hourly/daily thresholds
+- [x] T064 [P] [US3] Add session statistics (duration, total transferred)
 
 #### Safety Thresholds
 
-- [ ] T065 [US3] Implement threshold monitoring in `TetherFlow/Services/SafetyMonitor.swift`
-- [ ] T066 [US3] Add hourly data limit checking (default: 10GB)
-- [ ] T067 [US3] Add daily data limit checking (default: 50GB)
-- [ ] T068 [US3] Implement alert notification system
+- [x] T065 [US3] Implement threshold monitoring in `TetherFlow/Services/SafetyMonitor.swift`
+- [x] T066 [US3] Add hourly data limit checking (default: 10GB)
+- [x] T067 [US3] Add daily data limit checking (default: 50GB)
+- [x] T068 [US3] Implement alert notification system
 
 #### Emergency Kill-Switch
 
-- [ ] T069 [US3] Add kill-switch button to Dashboard and Menu Bar
-- [ ] T070 [US3] Implement instant cloaking termination
-- [ ] T071 [US3] Add network stack reset on kill-switch activation
+- [x] T069 [US3] Add kill-switch button to Dashboard and Menu Bar
+- [x] T070 [US3] Implement instant cloaking termination
+- [x] T071 [US3] Add network stack reset on kill-switch activation
 
 **Checkpoint**: Dashboard displays metrics, alerts work, kill-switch functional
 
@@ -205,20 +205,20 @@
 
 #### Disconnection Detection
 
-- [ ] T072 [US4] Enhance WiFiMonitor with disconnect detection
-- [ ] T073 [US4] Implement network change handler (SSID changed → revert)
+- [x] T072 [US4] Enhance WiFiMonitor with disconnect detection
+- [x] T073 [US4] Implement network change handler (SSID changed → revert)
 
 #### Reversion Logic
 
-- [ ] T074 [US4] Implement automatic reversion on disconnect
-- [ ] T075 [US4] Add reversion verification (confirm TTL/MTU restored)
-- [ ] T076 [US4] Handle edge cases: sleep/wake, interface changes
+- [x] T074 [US4] Implement automatic reversion on disconnect
+- [x] T075 [US4] Add reversion verification (confirm TTL/MTU restored)
+- [x] T076 [US4] Handle edge cases: sleep/wake, interface changes
 
 #### State Cleanup
 
-- [ ] T077 [US4] Implement session cleanup on disconnect
-- [ ] T078 [US4] Add metrics persistence for completed sessions
-- [ ] T079 [US4] Reset UI state on reversion
+- [x] T077 [US4] Implement session cleanup on disconnect
+- [x] T078 [US4] Add metrics persistence for completed sessions
+- [x] T079 [US4] Reset UI state on reversion
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -228,16 +228,16 @@
 
 ### Traffic Shaping
 
-- [ ] T080 Implement `TetherFlow/Services/TrafficShaper.swift` using pfctl
-- [ ] T081 Add background traffic identification (macOS updates, iCloud)
-- [ ] T082 Implement intelligent delay/shaping rules
-- [ ] T083 Wire traffic shaping into cloaking activation
+- [x] T080 Implement `TetherFlow/Services/TrafficShaper.swift` using pfctl
+- [x] T081 Add background traffic identification (macOS updates, iCloud)
+- [x] T082 Implement intelligent delay/shaping rules
+- [x] T083 Wire traffic shaping into cloaking activation
 
 ### Configuration Enhancements
 
-- [ ] T084 [P] Add custom DNS provider support
-- [ ] T085 [P] Add keyboard shortcuts for common actions
-- [ ] T086 [P] Implement profile import/export
+- [x] T084 [P] Add custom DNS provider support
+- [x] T085 [P] Add keyboard shortcuts for common actions
+- [x] T086 [P] Implement profile import/export
 
 ---
 
