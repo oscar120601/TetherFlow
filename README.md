@@ -56,7 +56,7 @@ TetherFlow 的 Web UI 版本 - 讓您的 MacBook 網路流量看起來像來自�
 ./start.sh
 
 # 2. 開啟瀏覽器
-open http://localhost:5000
+open http://localhost:5001
 ```
 
 ### 使用選單列圖示
@@ -66,6 +66,21 @@ open http://localhost:5000
 cd menubar
 ./start_menubar.sh
 ```
+
+### 🔥 開機自動啟動（推薦）
+
+**一鍵設定**（後端 + 選單列自動啟動）：
+```bash
+# 設定後端開機自動啟動
+./setup_autostart.sh
+
+# 設定選單列開機自動啟動
+./setup_menubar_autostart.sh
+```
+
+開機後無需任何操作，選單列會自動出現！
+
+📖 [詳細設定說明](README_AUTO_START.md)
 
 ### 使用 CLI 版本
 
@@ -111,7 +126,14 @@ TetherFlow/
 │   └── start_menubar.sh
 ├── cli/                      # CLI 工具
 │   └── tetherflow.sh
+├── menubar/                  # 選單列應用
+│   ├── tetherflow_menubar.py
+│   └── start_menubar.sh
+├── TetherFlow Menu.app       # 選單列應用程式 ⭐
 ├── start.sh                  # 啟動腳本
+├── setup_autostart.sh        # 後端自動啟動設定
+├── setup_menubar_autostart.sh # 選單列自動啟動設定 ⭐
+├── README_AUTO_START.md      # 自動啟動說明 ⭐
 ├── TETHERFLOW_WEB_PLAN.md    # 開發計劃
 └── README.md
 ```
@@ -120,6 +142,7 @@ TetherFlow/
 
 | 文件 | 說明 |
 |------|------|
+| [🚀 開機自動啟動](./README_AUTO_START.md) | **開機自動啟動設定指南** |
 | [📖 功能說明](./DOCS/FEATURES.md) | 詳細功能介紹與使用指南 |
 | [⚡ 快速參考](./DOCS/QUICK_REFERENCE.md) | 一頁式功能速查卡片 |
 | [🔄 流程圖](./DOCS/FLOW_DIAGRAMS.md) | 視覺化功能流程與架構 |

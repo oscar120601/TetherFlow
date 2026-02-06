@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SCRIPT_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+cd "$SCRIPT_DIR/menubar"
+
+# 檢查伺服器是否運行
+if ! curl -s http://localhost:5001/api/status > /dev/null 2>&1; then
+    osascript -e 'display notification "正在啟動 TetherFlow 伺服器..." with title "TetherFlow"'
+    
+    # 啟動後端
+    cd "$SCRIPT_DIR/web/backend"
+    nohup python3 server.py > /tmp/tetherflow.out.log 2>&1 &
+    
+    # 等待伺服器啟動
+    sleep 3
+fi
+
+# 啟動選單列
+python3 tetherflow_menubar.py
