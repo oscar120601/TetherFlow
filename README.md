@@ -100,6 +100,17 @@ TetherFlow/
 └── README.md
 ```
 
+## 📚 文件
+
+| 文件 | 說明 |
+|------|------|
+| [📖 功能說明](./DOCS/FEATURES.md) | 詳細功能介紹與使用指南 |
+| [⚡ 快速參考](./DOCS/QUICK_REFERENCE.md) | 一頁式功能速查卡片 |
+| [🔄 流程圖](./DOCS/FLOW_DIAGRAMS.md) | 視覺化功能流程與架構 |
+| [👤 使用者手冊](./DOCS/USER_GUIDE.md) | 完整使用教學 |
+| [🔌 API 文件](./DOCS/API_DOCUMENTATION.md) | 開發者 API 參考 |
+| [🏗️ 架構說明](./DOCS/ARCHITECTURE.md) | 系統設計文件 |
+
 ## 🔧 技術棧
 
 - **後端**: Python 3.9+ + Flask
@@ -109,20 +120,22 @@ TetherFlow/
 
 ## 🔐 加密 DNS (DoH) 功能
 
-### 即將推出！
+✅ **已完成！**
 
-macOS Big Sur (11.0+) 原生支援加密 DNS，我們將在 Phase 3 加入：
+macOS Big Sur (11.0+) 原生支援加密 DNS，已在 Phase 3 實作：
 
 **支援的 DNS 提供者：**
-- 🌐 Cloudflare (1.1.1.1)
-- 🛡️ Quad9 (9.9.9.9)
-- 🔍 Google (8.8.8.8)
-- 🚫 AdGuard DNS
+- 🌐 Cloudflare (1.1.1.1 / 1.0.0.1)
+- 👨‍👩‍👧‍👦 Cloudflare Family (1.1.1.3) - 過濾成人內容
+- 🔍 Google (8.8.8.8 / 8.8.4.4)
+- 🛡️ Quad9 (9.9.9.9) - 安全導向
+- 🔧 OpenDNS (208.67.222.222)
+- ✏️ 自訂 DNS 伺服器
 
 **功能：**
-- 一鍵啟用/停用 DoH
-- 自動備份原始 DNS
-- 與偽裝功能連動
+- 一鍵啟用/停用加密 DNS
+- 保護瀏覽隱私，防止 ISP 追蹤
+- 可選擇不同 DNS 提供者
 
 ## ⚠️ 安全說明
 
@@ -136,8 +149,14 @@ macOS Big Sur (11.0+) 原生支援加密 DNS，我們將在 Phase 3 加入：
 | 階段 | 內容 | 狀態 |
 |------|------|------|
 | Phase 1 | 基礎架構 (Web UI + API) | ✅ 完成 |
-| Phase 2 | 進階功能 (監控 + Profiles) | 🚧 進行中 |
-| Phase 3 | 增強功能 (DoH + 自動化) | 📅 規劃中 |
+| Phase 2 | 進階功能 (監控 + Profiles) | ✅ 完成 |
+| Phase 3 | 增強功能 (DoH + 自動化) | ✅ 完成 |
+
+### Phase 3 功能詳情
+- ✅ Wi-Fi 自動偵測與自動啟動
+- ✅ 加密 DNS (DoH/DoT) 支援
+- ✅ 流量整形 (Traffic Shaping)
+- ✅ 系統整合設定 (自動啟動、選單列)
 
 ## 💻 系統需求
 
