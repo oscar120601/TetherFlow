@@ -858,13 +858,32 @@ function renderSessionStats() {
     if (totalSessionsEl) {
         totalSessionsEl.textContent = stats.total_sessions || 0;
     }
+    
     if (totalTimeEl) {
-        const hours = (stats.total_cloak_time_hours || 0).toFixed(1);
-        totalTimeEl.textContent = `${hours}h`;
+        // Support both formats: total_cloak_time_hours (from /api/stats) 
+        // or total_cloak_time in seconds (from /api/status)
+        let hours;
+        if (stats.total_cloak_time_hours !== undefined) {
+            hours = stats.total_cloak_time_hours;
+        } else {
+            const totalSeconds = stats.total_cloak_time || 0;
+            hours = totalSeconds / 3600;
+        }
+        totalTimeEl.textContent = `${hours.toFixed(1)}h`;
     }
+    
     if (avgDurationEl) {
-        const minutes = Math.round(stats.avg_session_minutes || 0);
-        avgDurationEl.textContent = `${minutes}m`;
+        // Support both formats: avg_session_minutes (from /api/stats)
+        // or calculate from total_cloak_time (from /api/status)
+        let minutes;
+        if (stats.avg_session_minutes !== undefined) {
+            minutes = stats.avg_session_minutes;
+        } else {
+            const totalSeconds = stats.total_cloak_time || 0;
+            const sessions = stats.total_sessions || 0;
+            minutes = sessions > 0 ? Math.round(totalSeconds / sessions / 60) : 0;
+        }
+        avgDurationEl.textContent = `${Math.round(minutes)}m`;
     }
 
     renderUsageChart(stats.daily_usage || {});
@@ -1506,12 +1525,9 @@ async function loadStatus() {
     const data = await apiCall('/status');
 
     if (data.success) {
-        const { ttl, mtu, is_cloaked, has_password, session_stats, dns_servers } = data.data;
+        const { ttl, mtu, is_cloaked, has_password, dns_servers } = data.data;
         updateStatusUI(ttl, mtu, is_cloaked, has_password);
-        if (session_stats) {
-            state.sessionStats = session_stats;
-            renderSessionStats();
-        }
+        // Note: session_stats is loaded separately by loadSessionStats() to get calculated values
         // Update current DNS display
         if (dns_servers && dns_servers.length > 0) {
             const dnsContainer = document.getElementById('current-dns-servers');
