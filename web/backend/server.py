@@ -980,4 +980,17 @@ if __name__ == '__main__':
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
     """)
-    app.run(host='0.0.0.0', port=5002, debug=True)
+    
+    # 動態選擇可用端口
+    import socket
+    def find_free_port(start_port=5000, max_port=5010):
+        for port in range(start_port, max_port + 1):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                if s.connect_ex(('localhost', port)) != 0:
+                    return port
+        return 8080  # 備選端口
+    
+    port = find_free_port()
+    print(f"   Starting server on port: {port}")
+    
+    app.run(host='0.0.0.0', port=port, debug=True)
