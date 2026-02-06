@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i18n Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-8">
+    <h1 class="text-2xl font-bold mb-4">i18n Test Page</h1>
+    
+    <div class="space-y-4">
+        <div>
+            <h2 class="font-semibold">Current Language:</h2>
+            <p id="current-lang">-</p>
+        </div>
+        
+        <div>
+            <h2 class="font-semibold">Test Translations:</h2>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>nav.dashboard: <span id="test-dashboard">-</span></li>
+                <li>nav.profiles: <span id="test-profiles">-</span></li>
+                <li>nav.history: <span id="test-history">-</span></li>
+                <li>nav.settings: <span id="test-settings">-</span></li>
+            </ul>
+        </div>
+        
+        <div class="flex gap-2">
+            <button onclick="testSwitch('zh-TW')" class="px-4 py-2 bg-blue-500 text-white rounded">Switch to 中文</button>
+            <button onclick="testSwitch('en')" class="px-4 py-2 bg-green-500 text-white rounded">Switch to English</button>
+        </div>
+    </div>
+    
+    <script src="js/i18n.js"></script>
+    <script>
+        function updateDisplay() {
+            document.getElementById('current-lang').textContent = i18n.currentLang;
+            document.getElementById('test-dashboard').textContent = i18n.t('nav.dashboard');
+            document.getElementById('test-profiles').textContent = i18n.t('nav.profiles');
+            document.getElementById('test-history').textContent = i18n.t('nav.history');
+            document.getElementById('test-settings').textContent = i18n.t('nav.settings');
+        }
+        
+        function testSwitch(lang) {
+            i18n.switchLanguage(lang);
+            updateDisplay();
+        }
+        
+        // Initial load
+        document.addEventListener('DOMContentLoaded', updateDisplay);
+    </script>
+</body>
+</html>

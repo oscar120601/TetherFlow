@@ -1,284 +1,956 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TetherFlow - 網路偽裝控制面板</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>TetherFlow - Network Cloaking Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        surface: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Glassmorphism Effects */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .dark .glass {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Gradient Background */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-bg-animated {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Status Indicator Pulse */
+        .status-pulse {
+            animation: statusPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+        
+        /* Smooth Transitions */
+        .transition-all-300 {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        /* Toast Animation */
+        .toast-enter {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .toast-enter-active {
+            transform: translateX(0);
+            opacity: 1;
+            transition: all 0.3s ease-out;
+        }
+        
+        .toast-exit {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast-exit-active {
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease-in;
+        }
+        
+        /* Card Hover Effect */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Nav Item Active Indicator */
+        .nav-active {
+            position: relative;
+        }
+        
+        .nav-active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 24px;
+            background: linear-gradient(180deg, #60a5fa, #a78bfa);
+            border-radius: 0 3px 3px 0;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #3b82f6;
+        }
+        
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #3b82f6;
+        }
+        
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+    </style>
 </head>
-<body>
-    <div class="app">
-        <!-- 側邊欄 -->
-        <aside class="sidebar">
-            <div class="logo">
-                <span class="logo-icon">🛡️</span>
-                <span class="logo-text">TetherFlow</span>
+<body class="bg-surface-50 dark:bg-surface-900 text-surface-900 dark:text-surface-100 font-sans antialiased transition-colors duration-300">
+    
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Sidebar -->
+        <aside class="w-64 glass border-r border-surface-200 dark:border-surface-700 flex flex-col z-20">
+            <!-- Logo -->
+            <div class="p-6 border-b border-surface-200 dark:border-surface-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gradient-bg-animated flex items-center justify-center shadow-lg">
+                        <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+                            TetherFlow
+                        </h1>
+                        <p class="text-xs text-surface-500 dark:text-surface-400">Network Cloaking</p>
+                    </div>
+                </div>
             </div>
             
-            <nav class="nav">
-                <a href="#dashboard" class="nav-item active" data-page="dashboard">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-text">儀表板</span>
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-1">
+                <a href="#" data-page="dashboard" class="nav-item nav-active flex items-center gap-3 px-4 py-3 rounded-xl text-surface-700 dark:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all-300 group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-primary-500 group-hover:scale-110 transition-transform"></i>
+                    <span class="font-medium" data-i18n="nav.dashboard">Dashboard</span>
                 </a>
-                <a href="#profiles" class="nav-item" data-page="profiles">
-                    <span class="nav-icon">📋</span>
-                    <span class="nav-text">Profiles</span>
+                
+                <a href="#" data-page="profiles" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all-300 group">
+                    <i data-lucide="wifi" class="w-5 h-5 text-surface-400 group-hover:text-primary-500 group-hover:scale-110 transition-all"></i>
+                    <span class="font-medium" data-i18n="nav.profiles">Wi-Fi Profiles</span>
                 </a>
-                <a href="#history" class="nav-item" data-page="history">
-                    <span class="nav-icon">📜</span>
-                    <span class="nav-text">歷史記錄</span>
+                
+                <a href="#" data-page="history" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all-300 group">
+                    <i data-lucide="history" class="w-5 h-5 text-surface-400 group-hover:text-primary-500 group-hover:scale-110 transition-all"></i>
+                    <span class="font-medium" data-i18n="nav.history">History</span>
                 </a>
-                <a href="#settings" class="nav-item" data-page="settings">
-                    <span class="nav-icon">⚙️</span>
-                    <span class="nav-text">設定</span>
+                
+                <a href="#" data-page="settings" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all-300 group">
+                    <i data-lucide="settings" class="w-5 h-5 text-surface-400 group-hover:text-primary-500 group-hover:scale-110 transition-all"></i>
+                    <span class="font-medium" data-i18n="nav.settings">Settings</span>
                 </a>
             </nav>
             
-            <div class="sidebar-footer">
-                <p>v2.0 Web Edition</p>
+            <!-- Sidebar Footer -->
+            <div class="p-4 border-t border-surface-200 dark:border-surface-700">
+                <div class="glass-card rounded-xl p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                            <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-surface-500 dark:text-surface-400">Version</p>
+                            <p class="text-sm font-semibold">3.0 Web Edition</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </aside>
         
-        <!-- 主內容區 -->
-        <main class="main-content">
-            <!-- 頂部欄 -->
-            <header class="header">
-                <h1 class="page-title">儀表板</h1>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="refreshAll()">
-                        🔄 重新整理
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden relative">
+            <!-- Background Decoration -->
+            <div class="absolute inset-0 overflow-hidden pointer-events-none">
+                <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
+            </div>
+            
+            <!-- Header -->
+            <header class="glass border-b border-surface-200 dark:border-surface-700 px-8 py-4 flex items-center justify-between z-10">
+                <div>
+                    <h2 id="page-title" class="text-2xl font-bold text-surface-900 dark:text-white" data-i18n="page.dashboard.title">Dashboard</h2>
+                    <p id="page-subtitle" class="text-sm text-surface-500 dark:text-surface-400 mt-1" data-i18n="page.dashboard.subtitle">Manage your network cloaking settings</p>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Language Toggle -->
+                    <button id="language-toggle" onclick="i18n.toggle()" class="w-10 h-10 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all-300 text-sm font-semibold text-surface-700 dark:text-surface-200" title="Switch Language">
+                        EN
+                    </button>
+                    
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="p-2 rounded-xl hover:bg-surface-100 dark:hover:bg-surface-800 transition-all-300">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-yellow-400"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden text-surface-600"></i>
+                    </button>
+                    
+                    <!-- Refresh Button -->
+                    <button onclick="refreshAll()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 transition-all-300 text-sm font-medium">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        <span data-i18n="common.refresh">Refresh</span>
                     </button>
                 </div>
             </header>
             
-            <!-- 儀表板頁面 -->
-            <div id="page-dashboard" class="page active">
-                <!-- 狀態卡片 -->
-                <div class="status-cards">
-                    <div class="status-card">
-                        <div class="status-icon">🔢</div>
-                        <div class="status-info">
-                            <span class="status-label">TTL 值</span>
-                            <span class="status-value" id="ttl-value">--</span>
-                        </div>
-                        <div class="status-badge" id="ttl-badge">檢測中</div>
-                    </div>
-                    
-                    <div class="status-card">
-                        <div class="status-icon">📦</div>
-                        <div class="status-info">
-                            <span class="status-label">MTU 值</span>
-                            <span class="status-value" id="mtu-value">--</span>
-                        </div>
-                        <div class="status-badge" id="mtu-badge">檢測中</div>
-                    </div>
-                    
-                    <div class="status-card status-main">
-                        <div class="status-icon">🛡️</div>
-                        <div class="status-info">
-                            <span class="status-label">偽裝狀態</span>
-                            <span class="status-value" id="cloak-status">檢測中</span>
-                        </div>
-                        <div class="status-badge" id="cloak-badge">--</div>
-                    </div>
-                </div>
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-8 relative z-0">
                 
-                <!-- 密碼設定區 -->
-                <div class="card password-card" id="password-card">
-                    <div class="card-header">
-                        <h3>🔐 管理員密碼</h3>
-                        <span class="password-status" id="password-status">未設定</span>
-                    </div>
-                    <div class="card-body">
-                        <p class="password-desc">為了修改系統網路設定，需要您的 Mac 登入密碼。密碼僅儲存在記憶體中，不會儲存到硬碟。</p>
-                        <div class="password-form">
-                            <div class="input-group">
-                                <input type="password" id="password-input" placeholder="輸入您的 Mac 密碼...">
-                                <label class="checkbox">
-                                    <input type="checkbox" id="show-password" onchange="togglePassword()">
-                                    <span>顯示密碼</span>
-                                </label>
+                <!-- Dashboard Page -->
+                <div id="page-dashboard" class="page-content space-y-6 animate-fade-in">
+                    
+                    <!-- T004: Wi-Fi Auto-Detection Section -->
+                    <div id="wifi-detection-section" class="hidden"></div>
+                    
+                    <!-- Status Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- TTL Status -->
+                        <div class="glass-card rounded-2xl p-6 hover-lift">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-surface-500 dark:text-surface-400" data-i18n="status.ttl">TTL Value</p>
+                                    <p id="ttl-value" class="text-3xl font-bold mt-2 text-surface-900 dark:text-white">--</p>
+                                </div>
+                                <div id="ttl-icon" class="w-12 h-12 rounded-xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
+                                    <i data-lucide="activity" class="w-6 h-6 text-surface-400"></i>
+                                </div>
                             </div>
-                            <div class="password-actions">
-                                <button class="btn btn-primary" onclick="savePassword()">
-                                    💾 儲存密碼
-                                </button>
-                                <button class="btn btn-secondary" onclick="clearPassword()" id="btn-clear-pwd" style="display:none;">
-                                    🗑️ 清除密碼
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 控制按鈕 -->
-                <div class="card control-card">
-                    <div class="card-header">
-                        <h3>🎮 快速控制</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="control-buttons">
-                            <button class="btn btn-start" id="btn-start" onclick="startCloaking()" disabled>
-                                <span class="btn-icon">🟢</span>
-                                <span class="btn-text">
-                                    <strong>啟動偽裝</strong>
-                                    <small>設定 TTL=65, MTU=1400</small>
+                            <div class="mt-4">
+                                <span id="ttl-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-surface-400"></span>
+                                    <span data-i18n="status.checking">Checking...</span>
                                 </span>
-                            </button>
-                            
-                            <button class="btn btn-stop" id="btn-stop" onclick="stopCloaking()" disabled>
-                                <span class="btn-icon">🔴</span>
-                                <span class="btn-text">
-                                    <strong>停止偽裝</strong>
-                                    <small>還原 TTL=64, MTU=1500</small>
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Profiles 頁面 -->
-            <div id="page-profiles" class="page">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>📋 Wi-Fi Profiles</h3>
-                        <button class="btn btn-primary" onclick="showAddProfileModal()">
-                            ➕ 新增 Profile
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="profiles-list" class="profiles-list">
-                            <div class="empty-state">
-                                <span class="empty-icon">📭</span>
-                                <p>尚無 Profiles</p>
-                                <p class="empty-hint">點擊「新增 Profile」建立您的第一個設定</p>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 歷史記錄頁面 -->
-            <div id="page-history" class="page">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>📜 操作歷史</h3>
-                        <button class="btn btn-secondary" onclick="clearHistory()">
-                            🗑️ 清空
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="history-list" class="history-list">
-                            <div class="empty-state">
-                                <span class="empty-icon">📭</span>
-                                <p>尚無操作記錄</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 設定頁面 -->
-            <div id="page-settings" class="page">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>⚙️ 系統設定</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-name">自動重新整理</span>
-                                <span class="setting-desc">每 5 秒自動更新狀態</span>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" id="auto-refresh" checked onchange="toggleAutoRefresh()">
-                                <span class="toggle-slider"></span>
-                            </label>
                         </div>
                         
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-name">深色模式</span>
-                                <span class="setting-desc">切換深色主題</span>
+                        <!-- MTU Status -->
+                        <div class="glass-card rounded-2xl p-6 hover-lift">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-surface-500 dark:text-surface-400" data-i18n="status.mtu">MTU Value</p>
+                                    <p id="mtu-value" class="text-3xl font-bold mt-2 text-surface-900 dark:text-white">--</p>
+                                </div>
+                                <div id="mtu-icon" class="w-12 h-12 rounded-xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
+                                    <i data-lucide="package" class="w-6 h-6 text-surface-400"></i>
+                                </div>
                             </div>
-                            <label class="toggle">
-                                <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()">
-                                <span class="toggle-slider"></span>
-                            </label>
+                            <div class="mt-4">
+                                <span id="mtu-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-surface-400"></span>
+                                    <span data-i18n="status.checking">Checking...</span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Cloak Status -->
+                        <div id="cloak-card" class="glass-card rounded-2xl p-6 hover-lift relative overflow-hidden">
+                            <div class="absolute inset-0 gradient-bg-animated opacity-0 transition-opacity duration-500" id="cloak-bg"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-surface-500 dark:text-surface-400" data-i18n="status.cloak">Cloak Status</p>
+                                        <p id="cloak-status" class="text-3xl font-bold mt-2 text-surface-900 dark:text-white" data-i18n="status.checking">Checking...</p>
+                                    </div>
+                                    <div id="cloak-icon" class="w-12 h-12 rounded-xl bg-surface-100 dark:bg-surface-800 flex items-center justify-center">
+                                        <i data-lucide="shield" class="w-6 h-6 text-surface-400"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <span id="cloak-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-surface-400 animate-pulse"></span>
+                                        <span data-i18n="status.checking">Checking...</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- T006: Session Statistics -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="stats.title">Session Statistics</h3>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="stats.subtitle">Your cloaking activity overview</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-surface-50 dark:bg-surface-800/50 rounded-xl p-4">
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="stats.total_sessions">Total Sessions</p>
+                                <p id="stat-total-sessions" class="text-2xl font-bold text-surface-900 dark:text-white">0</p>
+                            </div>
+                            <div class="bg-surface-50 dark:bg-surface-800/50 rounded-xl p-4">
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="stats.total_time">Total Time</p>
+                                <p id="stat-total-time" class="text-2xl font-bold text-surface-900 dark:text-white">0h</p>
+                            </div>
+                            <div class="bg-surface-50 dark:bg-surface-800/50 rounded-xl p-4">
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="stats.avg_duration">Avg Duration</p>
+                                <p id="stat-avg-duration" class="text-2xl font-bold text-surface-900 dark:text-white">0m</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Usage Chart -->
+                        <div>
+                            <p class="text-sm font-medium text-surface-700 dark:text-surface-300 mb-3" data-i18n="stats.daily_usage">Daily Usage (Last 7 Days)</p>
+                            <div id="usage-chart">
+                                <p class="text-center text-surface-500 py-4" data-i18n="stats.no_data">No usage data yet</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- T005: Speed Test Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center">
+                                        <i data-lucide="gauge" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="speed.title">Speed Test</h3>
+                                        <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="speed.subtitle">Check your network performance</p>
+                                    </div>
+                                </div>
+                                <button id="btn-speed-test" onclick="runSpeedTest()" class="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-600 text-white font-medium transition-all flex items-center gap-2">
+                                    <i data-lucide="play" class="w-4 h-4"></i>
+                                    <span data-i18n="speed.run">Run Test</span>
+                                </button>
+                            </div>
+                            
+                            <div id="speed-test-history" class="space-y-2">
+                                <div class="text-center py-8 text-surface-500 dark:text-surface-400">
+                                    <i data-lucide="gauge" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
+                                    <p data-i18n="speed.no_tests">No speed tests yet</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card rounded-2xl p-6">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+                                    <i data-lucide="zap" class="w-5 h-5 text-rose-600 dark:text-rose-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="quick_actions.title">Quick Actions</h3>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="quick_actions.subtitle">Frequently used controls</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <button onclick="showPage('profiles')" class="w-full flex items-center justify-between p-4 rounded-xl bg-surface-50 dark:bg-surface-800/50 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="wifi" class="w-5 h-5 text-primary-500"></i>
+                                        <span class="font-medium text-surface-900 dark:text-white" data-i18n="quick_actions.manage_profiles">Manage Profiles</span>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-surface-400"></i>
+                                </button>
+                                
+                                <button onclick="showPage('history')" class="w-full flex items-center justify-between p-4 rounded-xl bg-surface-50 dark:bg-surface-800/50 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="history" class="w-5 h-5 text-primary-500"></i>
+                                        <span class="font-medium text-surface-900 dark:text-white" data-i18n="quick_actions.view_history">View History</span>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-surface-400"></i>
+                                </button>
+                                
+                                <button onclick="scanWifiNetworks()" class="w-full flex items-center justify-between p-4 rounded-xl bg-surface-50 dark:bg-surface-800/50 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors">
+                                    <div class="flex items-center gap-3">
+                                        <i data-lucide="scan" class="w-5 h-5 text-primary-500"></i>
+                                        <span class="font-medium text-surface-900 dark:text-white" data-i18n="quick_actions.scan_networks">Scan Networks</span>
+                                    </div>
+                                    <i data-lucide="chevron-right" class="w-5 h-5 text-surface-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Password Section -->
+                    <div id="password-section" class="glass-card rounded-2xl p-6 border-l-4 border-amber-400">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                    <i data-lucide="key" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="password.title">Admin Password</h3>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="password.subtitle">Required for network modifications</p>
+                                </div>
+                            </div>
+                            <span id="password-status" class="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300" data-i18n="password.not_set">
+                                Not Set
+                            </span>
+                        </div>
+                        
+                        <p class="text-sm text-surface-600 dark:text-surface-400 mb-4" data-i18n="password.description">
+                            To modify system network settings, your Mac login password is required. Password is stored in memory only and never saved to disk.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1 relative">
+                                <input 
+                                    type="password" 
+                                    id="password-input" 
+                                    placeholder="Enter your Mac password..."
+                                    data-i18n-placeholder="password.placeholder"
+                                    class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300"
+                                >
+                                <button onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-surface-400 hover:text-surface-600">
+                                    <i data-lucide="eye" class="w-4 h-4" id="password-eye"></i>
+                                </button>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="savePassword()" class="px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-all-300 hover:shadow-lg hover:shadow-primary-500/25" data-i18n="password.save">
+                                    Save Password
+                                </button>
+                                <button onclick="clearPassword()" id="btn-clear-pwd" class="hidden px-6 py-3 rounded-xl bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-200 font-medium transition-all-300" data-i18n="password.clear">
+                                    Clear Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Control Buttons -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <button id="btn-start" onclick="startCloaking()" disabled class="group relative overflow-hidden rounded-2xl p-6 text-left transition-all-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:shadow-green-500/20">
+                            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600 transition-transform group-hover:scale-105"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                        <i data-lucide="power" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-white mb-1" data-i18n="control.start">Start Cloaking</h3>
+                                <p class="text-green-100 text-sm" data-i18n="control.start.subtitle">Set TTL=65, MTU=1400</p>
+                            </div>
+                        </button>
+                        
+                        <button id="btn-stop" onclick="stopCloaking()" disabled class="group relative overflow-hidden rounded-2xl p-6 text-left transition-all-300 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-xl hover:shadow-red-500/20">
+                            <div class="absolute inset-0 bg-gradient-to-br from-rose-500 to-red-600 transition-transform group-hover:scale-105"></div>
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                                        <i data-lucide="square" class="w-6 h-6 text-white"></i>
+                                    </div>
+                                    <i data-lucide="arrow-right" class="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                                <h3 class="text-xl font-bold text-white mb-1" data-i18n="control.stop">Stop Cloaking</h3>
+                                <p class="text-red-100 text-sm" data-i18n="control.stop.subtitle">Reset TTL=64, MTU=1500</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Profiles Page -->
+                <div id="page-profiles" class="page-content hidden animate-fade-in">
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="p-6 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="profiles.title">Wi-Fi Profiles</h3>
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="profiles.subtitle">Manage your hotspot configurations</p>
+                            </div>
+                            <button onclick="showAddProfileModal()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-all-300 hover:shadow-lg hover:shadow-primary-500/25">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                                <span data-i18n="profiles.add">Add Profile</span>
+                            </button>
+                        </div>
+                        <div id="profiles-list" class="divide-y divide-surface-200 dark:divide-surface-700">
+                            <!-- Profiles will be rendered here -->
                         </div>
                     </div>
                 </div>
                 
-                <div class="card">
-                    <div class="card-header">
-                        <h3>ℹ️ 關於</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="about-info">
-                            <p><strong>TetherFlow v2.0</strong></p>
-                            <p>Web-based network cloaking utility for macOS</p>
-                            <p>讓您的 MacBook 網路流量看起來像來自移動設備</p>
-                            <br>
-                            <p>功能特性：</p>
-                            <ul>
-                                <li>✅ 即時 TTL/MTU 狀態監控</li>
-                                <li>✅ 一鍵啟動/停止偽裝</li>
-                                <li>✅ Profile 管理系統</li>
-                                <li>✅ 操作歷史記錄</li>
-                                <li>✅ 響應式 Web 介面</li>
-                            </ul>
+                <!-- History Page -->
+                <div id="page-history" class="page-content hidden animate-fade-in">
+                    <div class="glass-card rounded-2xl overflow-hidden">
+                        <div class="p-6 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="history.title">Operation History</h3>
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="history.subtitle">Track your cloaking activities</p>
+                            </div>
+                            <button onclick="clearHistory()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-200 font-medium transition-all-300">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                <span data-i18n="history.clear">Clear</span>
+                            </button>
+                        </div>
+                        <div id="history-list" class="divide-y divide-surface-200 dark:divide-surface-700">
+                            <!-- History will be rendered here -->
                         </div>
                     </div>
                 </div>
+                
+                <!-- Settings Page -->
+                <div id="page-settings" class="page-content hidden animate-fade-in space-y-6">
+                    <!-- T007: Wi-Fi Auto-Detection -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                <i data-lucide="radio" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="autodetect.title">Wi-Fi Auto-Detection</h3>
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="autodetect.subtitle">Auto-monitor and start cloaking</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-4 border-b border-surface-200 dark:border-surface-700">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="autodetect.enable">Enable Auto-Detection</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400">
+                                        <span id="autodetect-status-text" data-i18n="autodetect.disabled">Disabled</span>
+                                    </p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="autodetect-toggle" onchange="toggleAutoDetection()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between py-4">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="autodetect.notification">Show notification on connect</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="autonotify-toggle" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- T008: DNS Settings -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                <i data-lucide="shield" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="dns.title">DNS Settings</h3>
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="dns.subtitle">Use encrypted DNS (DoH/DoT) for privacy</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-4 border-b border-surface-200 dark:border-surface-700">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="dns.enable">Enable Encrypted DNS</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" id="dns-status-text" data-i18n="dns.disabled">Disabled</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="dns-toggle" onchange="toggleDNSSettings()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div id="dns-provider-section" class="py-4">
+                                <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="dns.provider">DNS Provider</label>
+                                <select id="dns-provider" onchange="changeDNSProvider()" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                    <option value="cloudflare" data-i18n="dns.cloudflare">Cloudflare</option>
+                                    <option value="cloudflare_family" data-i18n="dns.cloudflare_family">Cloudflare (Family)</option>
+                                    <option value="google" data-i18n="dns.google">Google DNS</option>
+                                    <option value="quad9" data-i18n="dns.quad9">Quad9</option>
+                                    <option value="opendns" data-i18n="dns.opendns">OpenDNS</option>
+                                </select>
+                                <div id="dns-servers-display" class="mt-2 text-sm text-surface-500">
+                                    Servers: 1.1.1.1, 1.0.0.1
+                                </div>
+                            </div>
+                            
+                            <div class="py-4 border-t border-surface-200 dark:border-surface-700">
+                                <p class="text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="dns.current_servers">Current DNS Servers</p>
+                                <div id="current-dns-servers" class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 text-sm">System Default</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- T009: Traffic Shaping -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                                <i data-lucide="sliders" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="traffic.title">Traffic Shaping</h3>
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="traffic.subtitle">Control background app network usage</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-4 border-b border-surface-200 dark:border-surface-700">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="traffic.enable">Enable Traffic Shaping</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" id="traffic-status-text" data-i18n="traffic.disabled">Disabled</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="traffic-toggle" onchange="toggleTrafficShaping()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div id="traffic-rules-section" class="hidden">
+                                <div class="flex items-center justify-between mb-4">
+                                    <p class="text-sm font-medium text-surface-700 dark:text-surface-300" data-i18n="traffic.rules">Traffic Rules</p>
+                                    <button onclick="showAddTrafficRuleModal()" class="px-3 py-1.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium transition-all">
+                                        + <span data-i18n="traffic.add_rule">Add Rule</span>
+                                    </button>
+                                </div>
+                                <div id="traffic-rules-list" class="space-y-2">
+                                    <p class="text-center text-surface-500 py-4 text-sm" data-i18n="traffic.no_rules">No traffic rules yet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- T010: System Integration -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                <i data-lucide="monitor" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-surface-900 dark:text-white" data-i18n="system.title">System Integration</h3>
+                                <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="system.subtitle">Advanced system settings</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-4 border-b border-surface-200 dark:border-surface-700">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="system.auto_launch">Auto-launch on startup</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="system.auto_launch_desc">Start TetherFlow automatically on login</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="autolaunch-toggle" onchange="toggleAutoLaunch()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between py-4 border-b border-surface-200 dark:border-surface-700">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="system.menubar">Menu Bar Icon</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="system.menubar_desc">Show TetherFlow icon in menu bar</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="menubar-toggle" onchange="toggleMenubar()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between py-4">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="system.shortcut">Global Shortcut</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="system.shortcut_desc">Quick start/stop cloaking</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span id="current-shortcut" class="px-3 py-1.5 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-700 dark:text-surface-300 text-sm font-mono">Cmd+Shift+T</span>
+                                    <button onclick="recordShortcut()" class="px-3 py-1.5 rounded-lg bg-surface-200 dark:bg-surface-700 hover:bg-surface-300 dark:hover:bg-surface-600 text-surface-700 dark:text-surface-200 text-sm transition-all" data-i18n="common.edit">Edit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- General Settings -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold text-surface-900 dark:text-white mb-6" data-i18n="settings.general">General Settings</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between py-4 border-b border-surface-200 dark:border-surface-700">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="settings.auto_refresh">Auto Refresh</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="settings.auto_refresh_desc">Update status every 5 seconds</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="auto-refresh" checked onchange="toggleAutoRefresh()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div class="flex items-center justify-between py-4">
+                                <div>
+                                    <p class="font-medium text-surface-900 dark:text-white" data-i18n="settings.dark_mode">Dark Mode</p>
+                                    <p class="text-sm text-surface-500 dark:text-surface-400" data-i18n="settings.dark_mode_desc">Toggle dark theme</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="dark-mode" onchange="toggleDarkMode()" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-surface-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-surface-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- About -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold text-surface-900 dark:text-white mb-4" data-i18n="settings.about">About</h3>
+                        <div class="space-y-3 text-surface-600 dark:text-surface-400">
+                            <p><strong class="text-surface-900 dark:text-white">TetherFlow v3.0</strong></p>
+                            <p data-i18n="settings.description">Web-based network cloaking utility for macOS</p>
+                            
+                            <div class="pt-4 space-y-2">
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>
+                                    <span data-i18n="settings.feature1">Real-time TTL/MTU monitoring</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>
+                                    <span data-i18n="settings.feature2">One-click start/stop cloaking</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>
+                                    <span data-i18n="settings.feature3">Profile management system</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>
+                                    <span>Encrypted DNS (DoH/DoT) Support</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </main>
     </div>
     
-    <!-- Toast 通知 -->
-    <div id="toast" class="toast"></div>
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
     
-    <!-- Modal: 新增/編輯 Profile -->
-    <div id="profile-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">新增 Profile</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="glass-card rounded-2xl w-full max-w-lg mx-4 animate-slide-up">
+            <div class="p-6 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between">
+                <h3 id="modal-title" class="text-xl font-bold text-surface-900 dark:text-white" data-i18n="profiles.add">Add Profile</h3>
+                <button onclick="closeModal()" class="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-all-300">
+                    <i data-lucide="x" class="w-5 h-5 text-surface-500"></i>
+                </button>
             </div>
-            <div class="modal-body">
+            <div class="p-6 space-y-4">
                 <input type="hidden" id="profile-id">
-                <div class="form-group">
-                    <label>名稱</label>
-                    <input type="text" id="profile-name" placeholder="例如：手機熱點">
+                
+                <div>
+                    <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="profiles.name">Name</label>
+                    <input type="text" id="profile-name" placeholder="e.g., Mobile Hotspot" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
                 </div>
-                <div class="form-group">
-                    <label>Wi-Fi SSID</label>
-                    <input type="text" id="profile-ssid" placeholder="例如：MyHotspot5G">
+                
+                <div>
+                    <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="profiles.ssid">Wi-Fi SSID</label>
+                    <input type="text" id="profile-ssid" placeholder="e.g., MyHotspot5G" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>TTL 值</label>
-                        <input type="number" id="profile-ttl" value="65" min="1" max="255">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="profiles.ttl">TTL</label>
+                        <input type="number" id="profile-ttl" value="65" min="1" max="255" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
                     </div>
-                    <div class="form-group">
-                        <label>MTU 值</label>
-                        <input type="number" id="profile-mtu" value="1400" min="1000" max="1500">
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="profiles.mtu">MTU</label>
+                        <input type="number" id="profile-mtu" value="1400" min="1000" max="1500" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label class="checkbox">
-                        <input type="checkbox" id="profile-auto">
-                        <span>連線時自動啟動偽裝</span>
-                    </label>
-                </div>
+                
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="profile-auto" class="w-5 h-5 rounded border-surface-300 text-primary-600 focus:ring-primary-500">
+                    <span class="text-surface-700 dark:text-surface-300" data-i18n="profiles.auto_start">Auto-start cloaking on connection</span>
+                </label>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
-                <button class="btn btn-primary" onclick="saveProfile()">儲存</button>
+            <div class="p-6 border-t border-surface-200 dark:border-surface-700 flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-6 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-200 font-medium transition-all-300" data-i18n="common.cancel">
+                    Cancel
+                </button>
+                <button onclick="saveProfile()" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-all-300 hover:shadow-lg hover:shadow-primary-500/25" data-i18n="profiles.save">
+                    Save Profile
+                </button>
             </div>
         </div>
     </div>
     
+    <!-- Traffic Rule Modal -->
+    <div id="traffic-rule-modal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="glass-card rounded-2xl w-full max-w-lg mx-4 animate-slide-up">
+            <div class="p-6 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between">
+                <h3 id="traffic-modal-title" class="text-xl font-bold text-surface-900 dark:text-white" data-i18n="traffic.add_rule">Add Rule</h3>
+                <button onclick="closeTrafficModal()" class="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-all-300">
+                    <i data-lucide="x" class="w-5 h-5 text-surface-500"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="traffic-rule-id">
+                
+                <div>
+                    <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="traffic.rule_name">Rule Name</label>
+                    <input type="text" id="traffic-rule-name" placeholder="e.g., Limit Background Sync" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="traffic.port">Port</label>
+                        <input type="text" id="traffic-rule-port" placeholder="e.g., 443, 8080" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="traffic.protocol">Protocol</label>
+                        <select id="traffic-rule-protocol" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
+                            <option value="tcp" data-i18n="traffic.tcp">TCP</option>
+                            <option value="udp" data-i18n="traffic.udp">UDP</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2" data-i18n="traffic.bandwidth">Bandwidth Limit (Kbps)</label>
+                    <input type="number" id="traffic-rule-bandwidth" value="1000" min="1" max="1000000" class="w-full px-4 py-3 rounded-xl border border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-800 text-surface-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all-300">
+                </div>
+            </div>
+            <div class="p-6 border-t border-surface-200 dark:border-surface-700 flex justify-end gap-3">
+                <button onclick="closeTrafficModal()" class="px-6 py-2.5 rounded-xl bg-surface-100 dark:bg-surface-800 hover:bg-surface-200 dark:hover:bg-surface-700 text-surface-700 dark:text-surface-200 font-medium transition-all-300" data-i18n="common.cancel">
+                    Cancel
+                </button>
+                <button onclick="saveTrafficRule()" class="px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-medium transition-all-300 hover:shadow-lg hover:shadow-primary-500/25" data-i18n="common.save">
+                    Save Rule
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/i18n.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

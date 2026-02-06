@@ -382,7 +382,7 @@ HTML_PAGE = """
         </div>
         
         <footer>
-            TetherFlow v1.0 | 瀏覽器控制面板
+            TetherFlow v3.0 | Phase 3 Complete
         </footer>
     </div>
     
@@ -764,7 +764,7 @@ def main():
         print(f"""
 ╔══════════════════════════════════════════════════╗
 ║                                                  ║
-║   🛡️  TetherFlow Web Server 已啟動！            ║
+║   🛡️  TetherFlow Web Server v3.0 - Phase 3     ║
 ║                                                  ║
 ║   請在瀏覽器開啟:                                 ║
 ║   http://localhost:{PORT}                        ║

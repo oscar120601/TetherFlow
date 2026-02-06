@@ -5,7 +5,7 @@
 
 echo "╔══════════════════════════════════════════════════╗"
 echo "║                                                  ║"
-echo "║   🛡️  TetherFlow Web Edition v2.0               ║"
+echo "║   🛡️  TetherFlow Web Edition v3.0               ║"
 echo "║                                                  ║"
 echo "╚══════════════════════════════════════════════════╝"
 echo ""
