@@ -28,6 +28,12 @@ TetherFlow 的 Web UI 版本 - 讓您的 MacBook 網路流量看起來像來自�
   - 流量整形 (Traffic Shaping)
   - 開機自動啟動 / 選單列圖示
   
+- **選單列應用** 🛡️
+  - Python + rumps 開發
+  - 即時狀態顯示（🟢 偽裝中 / ⚪ 未偽裝）
+  - 快速啟動/停止偽裝
+  - 一鍵打開 Web UI
+  
 - **安全性**
   - UI 密碼輸入（記憶體儲存）
   - 密碼驗證後才能操作
@@ -51,6 +57,14 @@ TetherFlow 的 Web UI 版本 - 讓您的 MacBook 網路流量看起來像來自�
 
 # 2. 開啟瀏覽器
 open http://localhost:5000
+```
+
+### 使用選單列圖示
+
+```bash
+# 啟動選單列應用（Python rumps）
+cd menubar
+./start_menubar.sh
 ```
 
 ### 使用 CLI 版本
@@ -92,11 +106,13 @@ TetherFlow/
 │       ├── index.html       # 主頁面
 │       ├── css/style.css    # 樣式
 │       └── js/app.js        # 前端邏輯
-├── cli/                      # CLI 工具（保留）
+├── menubar/                  # 選單列應用（rumps）
+│   ├── tetherflow_menubar.py
+│   └── start_menubar.sh
+├── cli/                      # CLI 工具
 │   └── tetherflow.sh
 ├── start.sh                  # 啟動腳本
 ├── TETHERFLOW_WEB_PLAN.md    # 開發計劃
-├── DOH_FEATURE_PLAN.md       # DoH 功能規劃
 └── README.md
 ```
 
@@ -115,6 +131,7 @@ TetherFlow/
 
 - **後端**: Python 3.9+ + Flask
 - **前端**: HTML5 + CSS3 + Vanilla JS
+- **選單列**: Python + rumps
 - **UI**: 自定義響應式設計
 - **API**: RESTful API with CORS
 
@@ -175,4 +192,4 @@ MIT License
 ---
 
 **GitHub**: https://github.com/oscar120601/TetherFlow  
-**版本**: v2.0 Web Edition
+**版本**: v3.1 Web Edition + Menu Bar

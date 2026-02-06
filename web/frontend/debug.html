@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TetherFlow 瀏覽器診斷</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        h2 { color: #555; font-size: 18px; margin-top: 24px; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 8px 4px;
+        }
+        button:hover { background: #2563eb; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        input {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            width: 300px;
+        }
+        input:focus { border-color: #3b82f6; outline: none; }
+        pre {
+            background: #1f2937;
+            color: #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        #log {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔍 TetherFlow 瀏覽器診斷工具</h1>
+        <p>這個頁面幫助診斷為什麼在瀏覽器無法啟用偽裝</p>
+    </div>
+
+    <div class="card">
+        <h2>1. 基本連線測試</h2>
+        <button onclick="testConnection()">測試 API 連線</button>
+        <div id="connection-result"></div>
+    </div>
+
+    <div class="card">
+        <h2>2. 密碼儲存測試</h2>
+        <input type="password" id="pwd-input" placeholder="輸入你的密碼">
+        <button onclick="testSavePassword()">測試儲存密碼</button>
+        <div id="password-result"></div>
+    </div>
+
+    <div class="card">
+        <h2>3. 啟動偽裝測試</h2>
+        <button id="start-btn" onclick="testStartCloaking()" disabled>啟動偽裝</button>
+        <button onclick="testStopCloaking()">停止偽裝</button>
+        <div id="cloaking-result"></div>
+    </div>
+
+    <div class="card">
+        <h2>4. 除錯日誌</h2>
+        <button onclick="clearLog()">清除日誌</button>
+        <pre id="log"></pre>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let savedPassword = null;
+        let hasPassword = false;
+
+        function log(msg, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#10b981';
+            logEl.innerHTML += `<div style="color: ${color}">[${timestamp}] ${msg}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[DEBUG] ${msg}`);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            log(`呼叫 API: ${endpoint}`);
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...options
+                });
+                const data = await response.json();
+                log(`API 回應: ${JSON.stringify(data).substring(0, 200)}...`, 'success');
+                return data;
+            } catch (error) {
+                log(`API 錯誤: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+
+        async function testConnection() {
+            log('測試 API 連線...');
+            const resultEl = document.getElementById('connection-result');
+            const data = await apiCall('/status');
+            
+            if (data.success) {
+                resultEl.innerHTML = `
+                    <p class="success">✅ 連線成功！</p>
+                    <p>TTL: ${data.data.ttl}</p>
+                    <p>MTU: ${data.data.mtu}</p>
+                    <p>已偽裝: ${data.data.is_cloaked}</p>
+                    <p>伺服器有密碼: ${data.data.has_password}</p>
+                `;
+                hasPassword = data.data.has_password;
+                document.getElementById('start-btn').disabled = !hasPassword;
+            } else {
+                resultEl.innerHTML = `<p class="error">❌ 連線失敗: ${data.error}</p>`;
+            }
+        }
+
+        async function testSavePassword() {
+            const input = document.getElementById('pwd-input');
+            const password = input.value.trim();
+            
+            if (!password) {
+                log('密碼為空', 'error');
+                return;
+            }
+            
+            log(`測試儲存密碼 (長度: ${password.length})`);
+            const resultEl = document.getElementById('password-result');
+            
+            const data = await apiCall('/save-password', {
+                method: 'POST',
+                body: JSON.stringify({ password })
+            });
+            
+            if (data.success) {
+                resultEl.innerHTML = `<p class="success">✅ ${data.message}</p>`;
+                savedPassword = password;
+                hasPassword = true;
+                document.getElementById('start-btn').disabled = false;
+                log('密碼儲存成功', 'success');
+            } else {
+                resultEl.innerHTML = `<p class="error">❌ ${data.error}</p>`;
+                log(`密碼儲存失敗: ${data.error}`, 'error');
+            }
+        }
+
+        async function testStartCloaking() {
+            if (!hasPassword) {
+                log('沒有密碼，無法啟動', 'error');
+                return;
+            }
+            
+            log('測試啟動偽裝...');
+            const resultEl = document.getElementById('cloaking-result');
+            
+            const data = await apiCall('/start', {
+                method: 'POST',
+                body: JSON.stringify({ ttl: 65, mtu: 1400 })
+            });
+            
+            if (data.success) {
+                resultEl.innerHTML = `<p class="success">✅ ${data.message}</p>`;
+                log('偽裝啟動成功', 'success');
+                setTimeout(testConnection, 1000);
+            } else {
+                resultEl.innerHTML = `<p class="error">❌ ${data.error}</p>`;
+                log(`偽裝啟動失敗: ${data.error}`, 'error');
+            }
+        }
+
+        async function testStopCloaking() {
+            log('測試停止偽裝...');
+            const resultEl = document.getElementById('cloaking-result');
+            
+            const data = await apiCall('/stop', { method: 'POST' });
+            
+            if (data.success) {
+                resultEl.innerHTML = `<p class="success">✅ ${data.message}</p>`;
+                log('偽裝停止成功', 'success');
+                setTimeout(testConnection, 1000);
+            } else {
+                resultEl.innerHTML = `<p class="error">❌ ${data.error}</p>`;
+                log(`偽裝停止失敗: ${data.error}`, 'error');
+            }
+        }
+
+        // 頁面載入時自動測試連線
+        window.onload = () => {
+            log('診斷頁面載入完成');
+            testConnection();
+        };
+    </script>
+</body>
+</html>

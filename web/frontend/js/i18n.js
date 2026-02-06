@@ -6,7 +6,7 @@
 const i18n = {
     // Current language
     currentLang: localStorage.getItem('language') || 'zh-TW',
-    
+
     // Translations
     translations: {
         'zh-TW': {
@@ -15,7 +15,7 @@ const i18n = {
             'nav.profiles': 'Wi-Fi 配置',
             'nav.history': '操作歷史',
             'nav.settings': '設定',
-            
+
             // Page Titles
             'page.dashboard.title': '儀表板',
             'page.dashboard.subtitle': '管理您的網路偽裝設定',
@@ -25,7 +25,7 @@ const i18n = {
             'page.history.subtitle': '檢視您的操作記錄',
             'page.settings.title': '設定',
             'page.settings.subtitle': '調整系統偏好',
-            
+
             // Status Cards
             'status.ttl': 'TTL 值',
             'status.mtu': 'MTU 值',
@@ -35,7 +35,7 @@ const i18n = {
             'status.checking': '檢測中...',
             'status.active': '已啟動',
             'status.inactive': '未啟動',
-            
+
             // Password Section
             'password.title': '管理員密碼',
             'password.subtitle': '修改網路設定需要密碼',
@@ -48,7 +48,7 @@ const i18n = {
             'password.error.empty': '請輸入密碼',
             'password.success': '密碼已儲存！現在可以控制偽裝',
             'password.cleared': '密碼已清除',
-            
+
             // Control Buttons
             'control.start': '啟動偽裝',
             'control.start.subtitle': '設定 TTL=65, MTU=1400',
@@ -56,7 +56,7 @@ const i18n = {
             'control.stop.subtitle': '還原 TTL=64, MTU=1500',
             'control.starting': '啟動中...',
             'control.stopping': '停止中...',
-            
+
             // Profiles
             'profiles.title': 'Wi-Fi 配置',
             'profiles.subtitle': '管理您的熱點設定',
@@ -76,7 +76,7 @@ const i18n = {
             'profiles.created': '配置已建立',
             'profiles.updated': '配置已更新',
             'profiles.deleted': '配置已刪除',
-            
+
             // History
             'history.title': '操作歷史',
             'history.subtitle': '追蹤您的偽裝活動',
@@ -89,7 +89,7 @@ const i18n = {
             'history.status.success': '成功',
             'history.status.failed': '失敗',
             'history.cleared': '歷史已清空',
-            
+
             // Settings
             'settings.general': '一般設定',
             'settings.auto_refresh': '自動重新整理',
@@ -105,13 +105,14 @@ const i18n = {
             'settings.feature2': '一鍵啟動/停止偽裝',
             'settings.feature3': '配置管理系統',
             'settings.feature4': '現代化響應式介面',
-            
+
             // Toast Messages
             'toast.refresh': '已重新整理',
             'toast.network_error': '網路連線失敗',
             'toast.password_required': '請先儲存密碼',
             'toast.fill_required': '請填寫必填欄位',
-            
+            'toast.network_error_cloaking': '網路連線不穩定，正在確認偽裝狀態...',
+
             // Session Statistics (T006)
             'stats.title': '會話統計',
             'stats.subtitle': '您的偽裝活動概覽',
@@ -120,7 +121,7 @@ const i18n = {
             'stats.avg_duration': '平均時長',
             'stats.daily_usage': '每日使用（最近 7 天）',
             'stats.no_data': '尚無使用資料',
-            
+
             // Speed Test (T005)
             'speed.title': '速度測試',
             'speed.subtitle': '檢查您的網路效能',
@@ -131,14 +132,14 @@ const i18n = {
             'speed.upload': '上傳',
             'speed.ping': '延遲',
             'speed.failed': '速度測試失敗',
-            
+
             // Quick Actions
             'quick_actions.title': '快捷操作',
             'quick_actions.subtitle': '常用控制項目',
             'quick_actions.manage_profiles': '管理配置',
             'quick_actions.view_history': '檢視歷史',
             'quick_actions.scan_networks': '掃描網路',
-            
+
             // Wi-Fi Detection (T004)
             'wifi.current': '目前 Wi-Fi',
             'wifi.not_connected': '未連線',
@@ -155,7 +156,7 @@ const i18n = {
             'wifi.signal_weak': '訊號微弱',
             'wifi.scanning': '正在掃描 Wi-Fi 網路...',
             'wifi.no_networks': '找不到 Wi-Fi 網路',
-            
+
             // T007: Wi-Fi Auto-Detection
             'autodetect.title': 'Wi-Fi 自動偵測',
             'autodetect.subtitle': '自動監控並啟動偽裝',
@@ -167,7 +168,7 @@ const i18n = {
             'autodetect.inactive': '未監控',
             'autodetect.auto_start': '連線時自動啟動',
             'autodetect.notification': '連線時顯示通知',
-            
+
             // T008: DNS Settings
             'dns.title': 'DNS 設定',
             'dns.subtitle': '使用加密 DNS (DoH/DoT) 保護隱私',
@@ -185,7 +186,7 @@ const i18n = {
             'dns.quad9': 'Quad9',
             'dns.opendns': 'OpenDNS',
             'dns.servers': 'DNS 伺服器',
-            
+
             // T009: Traffic Shaping
             'traffic.title': '流量整形',
             'traffic.subtitle': '控制背景應用程式網路使用',
@@ -202,7 +203,7 @@ const i18n = {
             'traffic.udp': 'UDP',
             'traffic.no_rules': '尚無流量規則',
             'traffic.delete_confirm': '確定要刪除此規則嗎？',
-            
+
             // T010: System Integration
             'system.title': '系統整合',
             'system.subtitle': '進階系統設定',
@@ -214,7 +215,7 @@ const i18n = {
             'system.shortcut_desc': '快速啟動/停止偽裝',
             'system.current_shortcut': '目前快捷鍵',
             'system.press_key': '按下按鍵組合...',
-            
+
             // Common
             'common.save': '儲存',
             'common.cancel': '取消',
@@ -227,14 +228,14 @@ const i18n = {
             'common.no': '否',
             'common.confirm': '確認',
         },
-        
+
         'en': {
             // Navigation
             'nav.dashboard': 'Dashboard',
             'nav.profiles': 'Wi-Fi Profiles',
             'nav.history': 'History',
             'nav.settings': 'Settings',
-            
+
             // Page Titles
             'page.dashboard.title': 'Dashboard',
             'page.dashboard.subtitle': 'Manage your network cloaking settings',
@@ -244,7 +245,7 @@ const i18n = {
             'page.history.subtitle': 'Track your cloaking activities',
             'page.settings.title': 'Settings',
             'page.settings.subtitle': 'Adjust system preferences',
-            
+
             // Status Cards
             'status.ttl': 'TTL Value',
             'status.mtu': 'MTU Value',
@@ -254,7 +255,7 @@ const i18n = {
             'status.checking': 'Checking...',
             'status.active': 'Active',
             'status.inactive': 'Inactive',
-            
+
             // Password Section
             'password.title': 'Admin Password',
             'password.subtitle': 'Required for network modifications',
@@ -267,7 +268,7 @@ const i18n = {
             'password.error.empty': 'Please enter your password',
             'password.success': 'Password saved! You can now control cloaking',
             'password.cleared': 'Password cleared',
-            
+
             // Control Buttons
             'control.start': 'Start Cloaking',
             'control.start.subtitle': 'Set TTL=65, MTU=1400',
@@ -275,7 +276,7 @@ const i18n = {
             'control.stop.subtitle': 'Reset TTL=64, MTU=1500',
             'control.starting': 'Starting...',
             'control.stopping': 'Stopping...',
-            
+
             // Profiles
             'profiles.title': 'Wi-Fi Profiles',
             'profiles.subtitle': 'Manage your hotspot settings',
@@ -295,7 +296,7 @@ const i18n = {
             'profiles.created': 'Profile created',
             'profiles.updated': 'Profile updated',
             'profiles.deleted': 'Profile deleted',
-            
+
             // History
             'history.title': 'Operation History',
             'history.subtitle': 'Track your cloaking activities',
@@ -308,7 +309,7 @@ const i18n = {
             'history.status.success': 'Success',
             'history.status.failed': 'Failed',
             'history.cleared': 'History cleared',
-            
+
             // Settings
             'settings.general': 'General Settings',
             'settings.auto_refresh': 'Auto Refresh',
@@ -324,13 +325,14 @@ const i18n = {
             'settings.feature2': 'One-click start/stop cloaking',
             'settings.feature3': 'Profile management system',
             'settings.feature4': 'Modern responsive interface',
-            
+
             // Toast Messages
             'toast.refresh': 'Refreshed',
             'toast.network_error': 'Network connection failed',
             'toast.password_required': 'Please save your password first',
             'toast.fill_required': 'Please fill in all required fields',
-            
+            'toast.network_error_cloaking': 'Network unstable, verifying cloaking status...',
+
             // Session Statistics (T006)
             'stats.title': 'Session Statistics',
             'stats.subtitle': 'Your cloaking activity overview',
@@ -339,7 +341,7 @@ const i18n = {
             'stats.avg_duration': 'Avg Duration',
             'stats.daily_usage': 'Daily Usage (Last 7 Days)',
             'stats.no_data': 'No usage data yet',
-            
+
             // Speed Test (T005)
             'speed.title': 'Speed Test',
             'speed.subtitle': 'Check your network performance',
@@ -350,14 +352,14 @@ const i18n = {
             'speed.upload': 'Upload',
             'speed.ping': 'Ping',
             'speed.failed': 'Speed test failed',
-            
+
             // Quick Actions
             'quick_actions.title': 'Quick Actions',
             'quick_actions.subtitle': 'Frequently used controls',
             'quick_actions.manage_profiles': 'Manage Profiles',
             'quick_actions.view_history': 'View History',
             'quick_actions.scan_networks': 'Scan Networks',
-            
+
             // Wi-Fi Detection (T004)
             'wifi.current': 'Current Wi-Fi',
             'wifi.not_connected': 'Not Connected',
@@ -374,7 +376,7 @@ const i18n = {
             'wifi.signal_weak': 'Weak',
             'wifi.scanning': 'Scanning Wi-Fi networks...',
             'wifi.no_networks': 'No Wi-Fi networks found',
-            
+
             // T007: Wi-Fi Auto-Detection
             'autodetect.title': 'Wi-Fi Auto-Detection',
             'autodetect.subtitle': 'Auto-monitor and start cloaking',
@@ -386,7 +388,7 @@ const i18n = {
             'autodetect.inactive': 'Inactive',
             'autodetect.auto_start': 'Auto-start on connection',
             'autodetect.notification': 'Show notification on connect',
-            
+
             // T008: DNS Settings
             'dns.title': 'DNS Settings',
             'dns.subtitle': 'Use encrypted DNS (DoH/DoT) for privacy',
@@ -404,7 +406,7 @@ const i18n = {
             'dns.quad9': 'Quad9',
             'dns.opendns': 'OpenDNS',
             'dns.servers': 'DNS Servers',
-            
+
             // T009: Traffic Shaping
             'traffic.title': 'Traffic Shaping',
             'traffic.subtitle': 'Control background app network usage',
@@ -421,7 +423,7 @@ const i18n = {
             'traffic.udp': 'UDP',
             'traffic.no_rules': 'No traffic rules yet',
             'traffic.delete_confirm': 'Are you sure you want to delete this rule?',
-            
+
             // T010: System Integration
             'system.title': 'System Integration',
             'system.subtitle': 'Advanced system settings',
@@ -433,7 +435,7 @@ const i18n = {
             'system.shortcut_desc': 'Quick start/stop cloaking',
             'system.current_shortcut': 'Current Shortcut',
             'system.press_key': 'Press key combination...',
-            
+
             // Common
             'common.save': 'Save',
             'common.cancel': 'Cancel',
@@ -447,41 +449,41 @@ const i18n = {
             'common.confirm': 'Confirm',
         }
     },
-    
+
     // Initialize
     init() {
         this.updatePageLanguage();
         this.updateLanguageToggle();
     },
-    
+
     // Get translation
     t(key) {
         const translation = this.translations[this.currentLang][key];
         return translation || key;
     },
-    
+
     // Switch language
     switchLanguage(lang) {
         if (this.translations[lang]) {
             this.currentLang = lang;
             localStorage.setItem('language', lang);
-            
+
             // Update all static i18n elements
             this.updatePageLanguage();
-            
+
             // Update page title
             const currentPage = document.querySelector('.nav-active')?.dataset.page || 'dashboard';
             const pageTitle = document.getElementById('page-title');
             if (pageTitle) {
                 pageTitle.textContent = this.t(`page.${currentPage}.title`);
             }
-            
+
             // Update page subtitle
             const headerSubtitle = document.getElementById('page-subtitle');
             if (headerSubtitle) {
                 headerSubtitle.textContent = this.t(`page.${currentPage}.subtitle`);
             }
-            
+
             // Update navigation active state text
             document.querySelectorAll('.nav-item').forEach(item => {
                 const page = item.dataset.page;
@@ -490,43 +492,43 @@ const i18n = {
                     span.textContent = this.t(`nav.${page}`);
                 }
             });
-            
+
             // Update refresh button text
             const refreshBtn = document.querySelector('button[onclick="refreshAll()"] span[data-i18n]');
             if (refreshBtn) {
                 refreshBtn.textContent = this.t('common.refresh');
             }
-            
+
             // Update language toggle button
             this.updateLanguageToggle();
-            
+
             // Re-render dynamic content
             if (typeof renderProfiles === 'function') renderProfiles();
             if (typeof renderHistory === 'function') renderHistory();
             if (typeof loadStatus === 'function') loadStatus();
-            
+
             return true;
         }
         return false;
     },
-    
+
     // Toggle between languages
     toggle() {
         const newLang = this.currentLang === 'zh-TW' ? 'en' : 'zh-TW';
         this.switchLanguage(newLang);
     },
-    
+
     // Update all elements with data-i18n attribute
     updatePageLanguage() {
         document.querySelectorAll('[data-i18n]').forEach(element => {
             const key = element.getAttribute('data-i18n');
             const translation = this.t(key);
-            
+
             // Skip elements that should keep their dynamic content (like #modal-title, #page-title)
             if (element.id === 'modal-title' || element.id === 'page-title') {
                 return;
             }
-            
+
             if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
                 if (element.hasAttribute('placeholder')) {
                     element.placeholder = translation;
@@ -537,7 +539,7 @@ const i18n = {
                 element.textContent = translation;
             }
         });
-        
+
         // Update page subtitle
         const pageSubtitle = document.querySelector('#page-' + (document.querySelector('.nav-active')?.dataset.page || 'dashboard'))?.previousElementSibling;
         if (pageSubtitle && pageSubtitle.tagName === 'P') {
@@ -545,7 +547,7 @@ const i18n = {
             pageSubtitle.textContent = this.t(`page.${currentPage}.subtitle`);
         }
     },
-    
+
     // Update language toggle button state
     updateLanguageToggle() {
         const langToggle = document.getElementById('language-toggle');

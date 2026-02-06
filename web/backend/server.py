@@ -15,9 +15,67 @@ import time
 import threading
 from datetime import datetime, timedelta
 from functools import wraps
+import sys
+import pathlib
 
 app = Flask(__name__)
 CORS(app)
+
+# Helper for Auto-launch
+def update_auto_launch(enabled):
+    """更新 macOS Auto-launch 設定"""
+    home = str(pathlib.Path.home())
+    plist_path = os.path.join(home, 'Library/LaunchAgents/com.chanoscar.tetherflow.plist')
+    
+    if enabled:
+        # 取得專案絕對路徑
+        current_dir = os.getcwd()
+        script_path = os.path.join(current_dir, 'start.sh')
+        
+        # 建立 plist 內容
+        plist_content = f"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.chanoscar.tetherflow</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>{script_path}</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>WorkingDirectory</key>
+    <string>{current_dir}</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/tetherflow.out</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/tetherflow.err</string>
+</dict>
+</plist>"""
+        
+        try:
+            # 寫入 plist
+            os.makedirs(os.path.dirname(plist_path), exist_ok=True)
+            with open(plist_path, 'w') as f:
+                f.write(plist_content)
+            
+            # 載入服務
+            subprocess.run(['launchctl', 'load', plist_path], check=False)
+            return True, "Auto-launch enabled"
+        except Exception as e:
+            return False, str(e)
+            
+    else:
+        try:
+            # 卸載服務
+            if os.path.exists(plist_path):
+                subprocess.run(['launchctl', 'unload', plist_path], check=False)
+                os.remove(plist_path)
+            return True, "Auto-launch disabled"
+        except Exception as e:
+            return False, str(e)
 
 # 全域狀態
 class AppState:
@@ -242,8 +300,9 @@ def get_network_status():
     except:
         pass
     
-    # 取得目前 Wi-Fi SSID
+    # 取得目前 Wi-Fi SSID（多種方法嘗試）
     try:
+        # 方法 1: 使用 airport 工具
         result = subprocess.run(
             ['/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport', '-I'],
             capture_output=True, text=True, timeout=5
@@ -257,6 +316,44 @@ def get_network_status():
                         break
     except:
         pass
+    
+    # 方法 2: 使用 networksetup
+    if not ssid:
+        try:
+            result = subprocess.run(
+                ['networksetup', '-getairportnetwork', interface],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0 and 'Current Wi-Fi Network' in result.stdout:
+                match = re.search(r'Current Wi-Fi Network:\s*(.+)', result.stdout)
+                if match:
+                    ssid = match.group(1).strip()
+            elif result.returncode == 0 and '你目前尚未與' not in result.stdout and 'You are not associated' not in result.stdout:
+                # 嘗試解析其他格式的輸出
+                parts = result.stdout.strip().split(':')
+                if len(parts) >= 2:
+                    potential_ssid = parts[-1].strip()
+                    if potential_ssid and potential_ssid not in ['', ' ']:
+                        ssid = potential_ssid
+        except:
+            pass
+    
+    # 方法 3: 使用 wdutil（macOS 12+）
+    if not ssid:
+        try:
+            result = subprocess.run(
+                ['wdutil', 'info'],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                for line in result.stdout.split('\n'):
+                    if 'SSID' in line:
+                        match = re.search(r'SSID\s*:\s*(.+)', line)
+                        if match:
+                            ssid = match.group(1).strip()
+                            break
+        except:
+            pass
     
     # 取得目前 DNS 伺服器
     try:
@@ -282,13 +379,12 @@ def get_network_status():
 def execute_sudo_command(command, password):
     """執行 sudo 指令"""
     try:
-        # 使用更安全的方式執行 sudo
         import shlex
-        # 構建指令：將密碼通過 stdin 傳給 sudo
-        sudo_cmd = ['sudo', '-S'] + shlex.split(command)
-        
-        # 創建一個進程，將密碼寫入 stdin
         import subprocess
+        
+        # 使用 -k 清除 sudo 快取，-S 從 stdin 讀取密碼
+        sudo_cmd = ['sudo', '-k', '-S'] + shlex.split(command)
+        
         proc = subprocess.Popen(
             sudo_cmd,
             stdin=subprocess.PIPE,
@@ -298,21 +394,24 @@ def execute_sudo_command(command, password):
         )
         
         # 傳送密碼（加上換行符）
-        stdout, stderr = proc.communicate(input=password + '\n', timeout=10)
+        stdout, stderr = proc.communicate(input=password + '\n', timeout=15)
         
         # 檢查是否成功
         if proc.returncode == 0:
             return True, stdout
         else:
-            # 檢查是否是密碼錯誤
-            if 'incorrect password' in stderr.lower() or 'sorry' in stderr.lower():
-                return False, '密碼錯誤'
-            return False, stderr
+            stderr_lower = stderr.lower()
+            # 檢查各種密碼錯誤的情況
+            if any(keyword in stderr_lower for keyword in ['incorrect password', 'sorry', 'password:', '密碼']):
+                return False, '密碼錯誤，請確認您的系統管理員密碼'
+            if 'operation not permitted' in stderr_lower:
+                return False, '操作不被允許，可能是 SIP (系統完整性保護) 或權限不足'
+            return False, stderr.strip()
     except subprocess.TimeoutExpired:
         proc.kill()
-        return False, '執行超時'
+        return False, '執行超時 (15秒)'
     except Exception as e:
-        return False, str(e)
+        return False, f'執行異常: {str(e)}'
 
 def run_speed_test():
     """執行網路速度測試"""
@@ -485,14 +584,8 @@ def detect_wifi():
     status = get_network_status()
     ssid = status.get('ssid')
     
-    if not ssid:
-        return jsonify({
-            'success': False,
-            'error': '無法偵測 Wi-Fi 網路'
-        }), 404
-    
     # 尋找匹配的 Profile
-    matching_profile = get_matching_profile(ssid)
+    matching_profile = get_matching_profile(ssid) if ssid else None
     
     return jsonify({
         'success': True,
@@ -500,7 +593,9 @@ def detect_wifi():
             'ssid': ssid,
             'interface': status.get('interface'),
             'matching_profile': matching_profile,
-            'can_auto_start': matching_profile and matching_profile.get('auto_start', False)
+            'can_auto_start': matching_profile and matching_profile.get('auto_start', False),
+            'has_wifi': ssid is not None,
+            'note': '無法偵測 Wi-Fi SSID，可能是使用有線網路或需要位置權限' if not ssid else None
         }
     })
 
@@ -685,6 +780,12 @@ def system_settings():
         })
     
     data = request.get_json()
+    
+    # 檢查 auto_launch 是否有變更
+    new_auto_launch = data.get('auto_launch')
+    if new_auto_launch is not None and new_auto_launch != state.system_settings['auto_launch']:
+        update_auto_launch(new_auto_launch)
+        
     state.system_settings.update({
         'auto_launch': data.get('auto_launch', state.system_settings['auto_launch']),
         'menubar_enabled': data.get('menubar_enabled', state.system_settings['menubar_enabled']),
@@ -736,20 +837,46 @@ def save_password():
     if not password:
         return jsonify({'success': False, 'error': '請輸入密碼'}), 400
     
-    # 測試密碼是否正確
-    success, error = execute_sudo_command('whoami', password)
+    # 測試密碼是否正確 - 使用一個簡單的 sudo 指令測試
+    success, result = test_password(password)
     
     if success:
         state.saved_password = password
         return jsonify({
             'success': True,
-            'message': '密碼已儲存（僅記憶體）'
+            'message': '密碼驗證成功，已儲存（僅記憶體）'
         })
     else:
+        error_msg = result or '密碼錯誤'
+        if 'incorrect password' in error_msg.lower() or 'sorry' in error_msg.lower():
+            error_msg = '密碼錯誤，請確認您的 macOS 系統管理員密碼'
         return jsonify({
             'success': False,
-            'error': '密碼錯誤'
+            'error': error_msg
         }), 401
+
+def test_password(password):
+    """測試密碼是否正確 - 返回 (success, result_or_error)"""
+    try:
+        import subprocess
+        proc = subprocess.Popen(
+            ['sudo', '-k', '-S', 'whoami'],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        stdout, stderr = proc.communicate(input=password + '\n', timeout=10)
+        
+        if proc.returncode == 0 and 'root' in stdout.lower():
+            return True, stdout.strip()
+        else:
+            error_msg = stderr.strip()
+            if 'incorrect password' in error_msg.lower() or 'sorry' in error_msg.lower():
+                error_msg = '密碼錯誤，請確認您的 macOS 系統管理員密碼'
+            return False, error_msg
+    except Exception as e:
+        return False, f'驗證異常: {str(e)}'
 
 @app.route('/api/clear-password', methods=['POST'])
 def clear_password():
@@ -759,7 +886,7 @@ def clear_password():
 
 @app.route('/api/start', methods=['POST'])
 def start_cloaking():
-    """啟動偽裝"""
+    """啟動偽裝 (同步執行，確保錯誤能被回報)"""
     data = request.get_json() or {}
     custom_ttl = data.get('ttl', 65)
     custom_mtu = data.get('mtu', 1400)
@@ -773,41 +900,71 @@ def start_cloaking():
     
     password = state.saved_password
     
-    # 修改 TTL
+    # 先嘗試修改 TTL
     success1, error1 = execute_sudo_command(f'sysctl net.inet.ip.ttl={custom_ttl}', password)
-    # 修改 MTU
-    success2, error2 = execute_sudo_command(f'ifconfig en0 mtu {custom_mtu}', password)
-    
-    success = success1 and success2
-    
-    # 記錄會話
-    state.add_session('start_cloaking', success, {
-        'ttl': custom_ttl if success1 else None,
-        'mtu': custom_mtu if success2 else None,
-        'profile_id': profile_id,
-        'error': error1 or error2 if not success else None
-    })
-    
-    if success:
-        return jsonify({
-            'success': True,
-            'message': f'偽裝已啟動 (TTL={custom_ttl}, MTU={custom_mtu})',
-            'data': {
-                'ttl': custom_ttl,
-                'mtu': custom_mtu,
-                'started_at': datetime.now().isoformat()
-            }
-        })
-    else:
-        error_msg = error1 or error2 or '執行失敗'
-        # 檢查是否是密碼錯誤（支援中英文）
-        if 'incorrect password' in error_msg.lower() or '密碼錯誤' in error_msg:
+    if not success1:
+        # 如果 TTL 修改失敗，回報錯誤
+        error_msg = error1 or '修改 TTL 失敗'
+        if '密碼錯誤' in error_msg:
             state.saved_password = None
             return jsonify({
                 'success': False,
                 'error': '密碼錯誤，請重新輸入'
             }), 401
-        return jsonify({'success': False, 'error': error_msg}), 500
+        
+        state.add_session('start_cloaking', False, {
+            'ttl': None,
+            'mtu': None,
+            'profile_id': profile_id,
+            'error': error_msg
+        })
+        return jsonify({
+            'success': False,
+            'error': f'啟動失敗: {error_msg}'
+        }), 500
+    
+    # 再嘗試修改 MTU
+    success2, error2 = execute_sudo_command(f'ifconfig en0 mtu {custom_mtu}', password)
+    if not success2:
+        # MTU 修改失敗，嘗試還原 TTL
+        execute_sudo_command('sysctl net.inet.ip.ttl=64', password)
+        
+        error_msg = error2 or '修改 MTU 失敗'
+        if '密碼錯誤' in error_msg:
+            state.saved_password = None
+            return jsonify({
+                'success': False,
+                'error': '密碼錯誤，請重新輸入'
+            }), 401
+        
+        state.add_session('start_cloaking', False, {
+            'ttl': custom_ttl,
+            'mtu': None,
+            'profile_id': profile_id,
+            'error': error_msg
+        })
+        return jsonify({
+            'success': False,
+            'error': f'啟動失敗: {error_msg}'
+        }), 500
+    
+    # 兩個指令都成功
+    state.add_session('start_cloaking', True, {
+        'ttl': custom_ttl,
+        'mtu': custom_mtu,
+        'profile_id': profile_id,
+        'error': None
+    })
+    
+    return jsonify({
+        'success': True,
+        'message': f'偽裝已啟動 (TTL={custom_ttl}, MTU={custom_mtu})',
+        'data': {
+            'ttl': custom_ttl,
+            'mtu': custom_mtu,
+            'started_at': datetime.now().isoformat()
+        }
+    })
 
 @app.route('/api/stop', methods=['POST'])
 def stop_cloaking():

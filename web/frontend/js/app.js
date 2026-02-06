@@ -167,8 +167,9 @@ function showToast(message, type = 'success') {
     };
 
     let displayMessage = message;
-    if (typeof i18n !== 'undefined' && message.startsWith && message.startsWith('toast.')) {
-        displayMessage = i18n.t(message);
+    if (typeof i18n !== 'undefined' && message && typeof message === 'string' && message.startsWith('toast.')) {
+        const translated = i18n.t(message);
+        displayMessage = translated || message;
     }
 
     toast.className = `${colors[type]} text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 toast-enter transform transition-all duration-300`;
@@ -194,20 +195,29 @@ function showToast(message, type = 'success') {
 
 // API Helper
 async function apiCall(endpoint, options = {}) {
+    const { suppressError, ...fetchOptions } = options;
+    const url = `${API_BASE}${endpoint}`;
+    console.log('[API] 呼叫:', url, '方法:', fetchOptions.method || 'GET');
+    
     try {
-        const response = await fetch(`${API_BASE}${endpoint}`, {
+        const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json'
             },
-            ...options
+            ...fetchOptions
         });
 
+        console.log('[API] 回應狀態:', response.status);
         const data = await response.json();
+        console.log('[API] 回應資料:', data);
         return data;
     } catch (error) {
-        console.error('API Error:', error);
-        showToast('Network connection failed', 'error');
-        return { success: false, error: 'Network error' };
+        console.error('[API] 錯誤:', error);
+        console.error('[API] 錯誤詳情:', error.message);
+        if (!suppressError) {
+            showToast('Network connection failed: ' + error.message, 'error');
+        }
+        return { success: false, error: 'Network error: ' + error.message };
     }
 }
 
@@ -912,7 +922,7 @@ function updateStatusUI(ttl, mtu, isCloaked, hasPassword) {
     if (ttlBadge) {
         ttlBadge.innerHTML = `
             <span class="w-1.5 h-1.5 rounded-full ${isCloakedTTL ? 'bg-emerald-500' : 'bg-surface-400'}"></span>
-            <span>${isCloakedTTL ? t('status.cloaked') : t('status.normal')}</span>
+            <span>${isCloakedTTL ? (t('status.cloaked') || '偽裝中') : (t('status.normal') || '正常')}</span>
         `;
         ttlBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isCloakedTTL ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
             }`;
@@ -932,7 +942,7 @@ function updateStatusUI(ttl, mtu, isCloaked, hasPassword) {
     if (mtuBadge) {
         mtuBadge.innerHTML = `
             <span class="w-1.5 h-1.5 rounded-full ${isCloakedMTU ? 'bg-emerald-500' : 'bg-surface-400'}"></span>
-            <span>${isCloakedMTU ? t('status.cloaked') : t('status.normal')}</span>
+            <span>${isCloakedMTU ? (t('status.cloaked') || '偽裝中') : (t('status.normal') || '正常')}</span>
         `;
         mtuBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isCloakedMTU ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
             }`;
@@ -947,11 +957,11 @@ function updateStatusUI(ttl, mtu, isCloaked, hasPassword) {
     const cloakIcon = document.getElementById('cloak-icon');
     const cloakBg = document.getElementById('cloak-bg');
 
-    if (cloakStatus) cloakStatus.textContent = isCloaked ? t('status.cloaked') : t('status.normal');
+    if (cloakStatus) cloakStatus.textContent = isCloaked ? (t('status.cloaked') || '偽裝中') : (t('status.normal') || '正常');
     if (cloakBadge) {
         cloakBadge.innerHTML = `
             <span class="w-1.5 h-1.5 rounded-full ${isCloaked ? 'bg-white animate-pulse' : 'bg-surface-400'}"></span>
-            <span>${isCloaked ? t('status.active') : t('status.inactive')}</span>
+            <span>${isCloaked ? (t('status.active') || '已啟動') : (t('status.inactive') || '未啟動')}</span>
         `;
         cloakBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isCloaked ? 'bg-white/20 text-white' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
             }`;
@@ -980,6 +990,7 @@ function updateStatusUI(ttl, mtu, isCloaked, hasPassword) {
 }
 
 function updatePasswordUI(saved) {
+    console.log('[DEBUG] updatePasswordUI() 被呼叫，saved=', saved);
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
 
     const section = document.getElementById('password-section');
@@ -987,26 +998,37 @@ function updatePasswordUI(saved) {
     const clearBtn = document.getElementById('btn-clear-pwd');
     const startBtn = document.getElementById('btn-start');
     const stopBtn = document.getElementById('btn-stop');
+    
+    console.log('[DEBUG] DOM 元素:', { section: !!section, status: !!status, clearBtn: !!clearBtn, startBtn: !!startBtn, stopBtn: !!stopBtn });
 
     if (saved) {
+        console.log('[DEBUG] 設定 UI 為已儲存狀態，啟用按鈕');
         if (section) {
             section.classList.remove('border-amber-400');
             section.classList.add('border-emerald-400');
         }
         if (status) {
-            status.textContent = t('password.set');
+            const statusText = t('password.set') || '已設定';
+            status.textContent = statusText;
             status.className = 'px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300';
         }
         if (clearBtn) clearBtn.classList.remove('hidden');
-        if (startBtn) startBtn.disabled = false;
-        if (stopBtn) stopBtn.disabled = false;
+        if (startBtn) {
+            startBtn.disabled = false;
+            console.log('[DEBUG] 啟動按鈕已啟用');
+        }
+        if (stopBtn) {
+            stopBtn.disabled = false;
+            console.log('[DEBUG] 停止按鈕已啟用');
+        }
     } else {
         if (section) {
             section.classList.remove('border-emerald-400');
             section.classList.add('border-amber-400');
         }
         if (status) {
-            status.textContent = t('password.not_set');
+            const statusText = t('password.not_set') || '未設定';
+            status.textContent = statusText;
             status.className = 'px-3 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300';
         }
         if (clearBtn) clearBtn.classList.add('hidden');
@@ -1030,27 +1052,37 @@ function togglePasswordVisibility() {
 }
 
 async function savePassword() {
+    console.log('[DEBUG] savePassword() 被呼叫');
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const input = document.getElementById('password-input');
     const password = input.value.trim();
+    
+    console.log('[DEBUG] 輸入的密碼長度:', password.length);
 
     if (!password) {
-        showToast(t('password.error.empty'), 'error');
+        console.log('[DEBUG] 密碼為空');
+        showToast(t('password.error.empty') || '請輸入密碼', 'error');
         return;
     }
 
+    console.log('[DEBUG] 呼叫 API /save-password');
     const data = await apiCall('/save-password', {
         method: 'POST',
         body: JSON.stringify({ password })
     });
+    
+    console.log('[DEBUG] API 回應:', data);
 
     if (data.success) {
+        console.log('[DEBUG] 密碼儲存成功，更新 state 和 UI');
         state.password = password;
+        console.log('[DEBUG] state.password 已設定:', state.password ? '有值' : '空');
         updatePasswordUI(true);
-        showToast(t('password.success'), 'success');
+        showToast(t('password.success') || '密碼已儲存！', 'success');
         input.value = '';
     } else {
-        showToast(data.error || 'Invalid password', 'error');
+        console.log('[DEBUG] 密碼儲存失敗:', data.error);
+        showToast(data.error || '密碼錯誤', 'error');
     }
 }
 
@@ -1062,33 +1094,50 @@ async function clearPassword() {
 }
 
 async function startCloaking() {
+    console.log('[DEBUG] startCloaking() 被呼叫');
+    console.log('[DEBUG] state.password:', state.password ? '有值' : '空');
+    
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     if (!state.password) {
-        showToast(t('toast.password_required'), 'warning');
+        console.log('[DEBUG] 沒有密碼，無法啟動');
+        showToast(t('toast.password_required') || '請先輸入並儲存密碼', 'warning');
+        // 自動滾動到密碼輸入區域
+        document.getElementById('password-section')?.scrollIntoView({ behavior: 'smooth' });
         return;
     }
 
     const btn = document.getElementById('btn-start');
+    console.log('[DEBUG] 開始啟動偽裝流程');
+    const originalText = btn.innerHTML;
     btn.innerHTML = `
         <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600"></div>
         <div class="relative z-10 flex items-center justify-center h-full">
             <div class="w-6 h-6 border-2 border-white/30 border-t-white rounded-full spinner mr-2"></div>
-            <span>${t('control.starting')}</span>
+            <span>${t('control.starting') || '啟動中...'}</span>
         </div>
     `;
     btn.disabled = true;
 
-    const data = await apiCall('/start', { method: 'POST' });
+    // 同步執行，等待結果
+    console.log('[DEBUG] 呼叫 /api/start');
+    const data = await apiCall('/start', { 
+        method: 'POST',
+        body: JSON.stringify({ ttl: 65, mtu: 1400 })
+    });
 
     if (data.success) {
         showToast(data.message, 'success');
         loadStatus();
         loadHistory();
     } else {
-        showToast(data.error, 'error');
-        // 檢查是否是密碼錯誤（支援中英文）
-        if (data.error && (data.error.includes('password') || data.error.includes('密碼'))) {
+        // 顯示詳細錯誤
+        const errorMsg = data.error || '啟動失敗';
+        showToast(errorMsg, 'error');
+        
+        // 如果是密碼錯誤，清除密碼並提示重新輸入
+        if (errorMsg.includes('密碼') || errorMsg.includes('password')) {
             clearPassword();
+            showToast('請重新輸入正確的系統管理員密碼', 'warning');
         }
     }
 
@@ -1107,12 +1156,12 @@ async function stopCloaking() {
         <div class="absolute inset-0 bg-gradient-to-br from-rose-500 to-red-600"></div>
         <div class="relative z-10 flex items-center justify-center h-full">
             <div class="w-6 h-6 border-2 border-white/30 border-t-white rounded-full spinner mr-2"></div>
-            <span>${t('control.stopping')}</span>
+            <span>${t('control.stopping') || '停止中...'}</span>
         </div>
     `;
     btn.disabled = true;
 
-    const data = await apiCall('/stop', { method: 'POST' });
+    const data = await apiCall('/stop', { method: 'POST', body: JSON.stringify({}) });
 
     if (data.success) {
         showToast(data.message, 'success');
@@ -1142,8 +1191,8 @@ function resetStartButton() {
                 </div>
                 <i data-lucide="arrow-right" class="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform"></i>
             </div>
-            <h3 class="text-xl font-bold text-white mb-1">${t('control.start')}</h3>
-            <p class="text-green-100 text-sm">${t('control.start.subtitle')}</p>
+            <h3 class="text-xl font-bold text-white mb-1">${t('control.start') || '啟動偽裝'}</h3>
+            <p class="text-green-100 text-sm">${t('control.start.subtitle') || '修改 TTL/MTU 模擬手機流量'}</p>
         </div>
     `;
     btn.disabled = false;
@@ -1162,8 +1211,8 @@ function resetStopButton() {
                 </div>
                 <i data-lucide="arrow-right" class="w-5 h-5 text-white/70 group-hover:translate-x-1 transition-transform"></i>
             </div>
-            <h3 class="text-xl font-bold text-white mb-1">${t('control.stop')}</h3>
-            <p class="text-red-100 text-sm">${t('control.stop.subtitle')}</p>
+            <h3 class="text-xl font-bold text-white mb-1">${t('control.stop') || '停止偽裝'}</h3>
+            <p class="text-red-100 text-sm">${t('control.stop.subtitle') || '還原 TTL/MTU 到預設值'}</p>
         </div>
     `;
     btn.disabled = false;
