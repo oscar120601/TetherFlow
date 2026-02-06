@@ -282,10 +282,35 @@ def get_network_status():
 def execute_sudo_command(command, password):
     """執行 sudo 指令"""
     try:
-        full_command = f"echo '{password}' | sudo -S {command}"
-        result = subprocess.run(full_command, shell=True, 
-                              capture_output=True, text=True, timeout=10)
-        return result.returncode == 0, result.stderr
+        # 使用更安全的方式執行 sudo
+        import shlex
+        # 構建指令：將密碼通過 stdin 傳給 sudo
+        sudo_cmd = ['sudo', '-S'] + shlex.split(command)
+        
+        # 創建一個進程，將密碼寫入 stdin
+        import subprocess
+        proc = subprocess.Popen(
+            sudo_cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        
+        # 傳送密碼（加上換行符）
+        stdout, stderr = proc.communicate(input=password + '\n', timeout=10)
+        
+        # 檢查是否成功
+        if proc.returncode == 0:
+            return True, stdout
+        else:
+            # 檢查是否是密碼錯誤
+            if 'incorrect password' in stderr.lower() or 'sorry' in stderr.lower():
+                return False, '密碼錯誤'
+            return False, stderr
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        return False, '執行超時'
     except Exception as e:
         return False, str(e)
 
@@ -775,7 +800,8 @@ def start_cloaking():
         })
     else:
         error_msg = error1 or error2 or '執行失敗'
-        if 'incorrect password' in error_msg.lower():
+        # 檢查是否是密碼錯誤（支援中英文）
+        if 'incorrect password' in error_msg.lower() or '密碼錯誤' in error_msg:
             state.saved_password = None
             return jsonify({
                 'success': False,
@@ -822,7 +848,8 @@ def stop_cloaking():
         })
     else:
         error_msg = error1 or error2 or '執行失敗'
-        if 'incorrect password' in error_msg.lower():
+        # 檢查是否是密碼錯誤（支援中英文）
+        if 'incorrect password' in error_msg.lower() or '密碼錯誤' in error_msg:
             state.saved_password = None
             return jsonify({
                 'success': False,
@@ -949,8 +976,8 @@ if __name__ == '__main__':
 ║   • T009: Traffic Shaping with pfctl                            ║
 ║   • T010: System Integration (Auto-launch, Menu Bar)            ║
 ║                                                                  ║
-║   Open in browser: http://localhost:5000                         ║
+║   Open in browser: http://localhost:5001                         ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
     """)
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)

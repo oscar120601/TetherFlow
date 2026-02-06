@@ -24,7 +24,7 @@ const state = {
     trafficRules: []
 };
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = '/api';
 
 // Initialize Icons
 function initIcons() {
@@ -51,7 +51,7 @@ function init() {
     detectWifi();
     // Phase 3
     loadPhase3Settings();
-    
+
     if (state.autoRefresh) {
         startAutoRefresh();
     }
@@ -60,9 +60,9 @@ function init() {
 // Theme Management
 function loadTheme() {
     const savedTheme = localStorage.getItem('theme');
-    const isDark = savedTheme === 'dark' || 
-                   (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    
+    const isDark = savedTheme === 'dark' ||
+        (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
     if (isDark) {
         document.documentElement.classList.add('dark');
         document.getElementById('dark-mode').checked = true;
@@ -93,7 +93,7 @@ function setupNavigation() {
             e.preventDefault();
             const page = item.dataset.page;
             showPage(page);
-            
+
             // Update active state
             document.querySelectorAll('.nav-item').forEach(i => {
                 i.classList.remove('nav-active');
@@ -107,19 +107,19 @@ function setupNavigation() {
 
 function showPage(pageId) {
     state.currentPage = pageId;
-    
+
     // Hide all pages
     document.querySelectorAll('.page-content').forEach(page => {
         page.classList.add('hidden');
     });
-    
+
     // Show target page with animation
     const targetPage = document.getElementById(`page-${pageId}`);
     targetPage.classList.remove('hidden');
     targetPage.classList.remove('animate-fade-in');
     void targetPage.offsetWidth; // Trigger reflow
     targetPage.classList.add('animate-fade-in');
-    
+
     // Update title and subtitle with i18n
     if (typeof i18n !== 'undefined') {
         document.getElementById('page-title').textContent = i18n.t(`page.${pageId}.title`);
@@ -151,40 +151,40 @@ function showPage(pageId) {
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
-    
+
     const colors = {
         success: 'bg-emerald-500',
         error: 'bg-rose-500',
         warning: 'bg-amber-500',
         info: 'bg-blue-500'
     };
-    
+
     const icons = {
         success: 'check-circle',
         error: 'x-circle',
         warning: 'alert-triangle',
         info: 'info'
     };
-    
+
     let displayMessage = message;
     if (typeof i18n !== 'undefined' && message.startsWith && message.startsWith('toast.')) {
         displayMessage = i18n.t(message);
     }
-    
+
     toast.className = `${colors[type]} text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 toast-enter transform transition-all duration-300`;
     toast.innerHTML = `
         <i data-lucide="${icons[type]}" class="w-5 h-5"></i>
         <span class="font-medium">${displayMessage}</span>
     `;
-    
+
     container.appendChild(toast);
     initIcons();
-    
+
     requestAnimationFrame(() => {
         toast.classList.remove('toast-enter');
         toast.classList.add('toast-enter-active');
     });
-    
+
     setTimeout(() => {
         toast.classList.remove('toast-enter-active');
         toast.classList.add('toast-exit-active');
@@ -201,7 +201,7 @@ async function apiCall(endpoint, options = {}) {
             },
             ...options
         });
-        
+
         const data = await response.json();
         return data;
     } catch (error) {
@@ -218,13 +218,13 @@ async function loadPhase3Settings() {
     const data = await apiCall('/status');
     if (data.success) {
         const { auto_detection, dns_settings, traffic_shaping, system_settings } = data.data;
-        
+
         // Update state
         state.autoDetection = auto_detection;
         state.dnsSettings = dns_settings;
         state.trafficShaping = traffic_shaping;
         state.systemSettings = system_settings;
-        
+
         // Update UI
         updateAutoDetectionUI();
         updateDNSUI();
@@ -237,7 +237,7 @@ function updateAutoDetectionUI() {
     const toggle = document.getElementById('autodetect-toggle');
     const statusText = document.getElementById('autodetect-status-text');
     if (!toggle || !statusText) return;
-    
+
     toggle.checked = state.autoDetection;
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     statusText.textContent = state.autoDetection ? t('autodetect.enabled') : t('autodetect.disabled');
@@ -246,12 +246,12 @@ function updateAutoDetectionUI() {
 async function toggleAutoDetection() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const newState = document.getElementById('autodetect-toggle').checked;
-    
+
     const data = await apiCall('/wifi/auto-detection', {
         method: 'POST',
         body: JSON.stringify({ enabled: newState })
     });
-    
+
     if (data.success) {
         state.autoDetection = data.data.enabled;
         updateAutoDetectionUI();
@@ -265,17 +265,17 @@ async function toggleAutoDetection() {
 // T008: DNS Settings
 function updateDNSUI() {
     if (!state.dnsSettings) return;
-    
+
     const toggle = document.getElementById('dns-toggle');
     const statusText = document.getElementById('dns-status-text');
     const providerSelect = document.getElementById('dns-provider');
     const serversDisplay = document.getElementById('dns-servers-display');
-    
+
     if (toggle) toggle.checked = state.dnsSettings.enabled;
-    
+
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     if (statusText) statusText.textContent = state.dnsSettings.enabled ? t('dns.enabled') : t('dns.disabled');
-    
+
     if (providerSelect) {
         providerSelect.value = state.dnsSettings.provider;
         updateDNSServersDisplay();
@@ -285,7 +285,7 @@ function updateDNSUI() {
 function updateDNSServersDisplay() {
     const provider = document.getElementById('dns-provider')?.value;
     const serversDisplay = document.getElementById('dns-servers-display');
-    
+
     const dnsServers = {
         'cloudflare': '1.1.1.1, 1.0.0.1',
         'cloudflare_family': '1.1.1.3, 1.0.0.3',
@@ -293,7 +293,7 @@ function updateDNSServersDisplay() {
         'quad9': '9.9.9.9, 149.112.112.112',
         'opendns': '208.67.222.222, 208.67.220.220'
     };
-    
+
     if (serversDisplay && dnsServers[provider]) {
         serversDisplay.textContent = `Servers: ${dnsServers[provider]}`;
     }
@@ -303,15 +303,15 @@ async function toggleDNSSettings() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const newState = document.getElementById('dns-toggle').checked;
     const provider = document.getElementById('dns-provider')?.value || 'cloudflare';
-    
+
     const data = await apiCall('/dns/settings', {
         method: 'POST',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
             enabled: newState,
             provider: provider
         })
     });
-    
+
     if (data.success) {
         state.dnsSettings = data.data;
         updateDNSUI();
@@ -333,35 +333,35 @@ function changeDNSProvider() {
 // T009: Traffic Shaping
 function updateTrafficUI() {
     if (!state.trafficShaping) return;
-    
+
     const toggle = document.getElementById('traffic-toggle');
     const statusText = document.getElementById('traffic-status-text');
     const rulesSection = document.getElementById('traffic-rules-section');
-    
+
     if (toggle) toggle.checked = state.trafficShaping.enabled;
-    
+
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     if (statusText) statusText.textContent = state.trafficShaping.enabled ? t('traffic.enabled') : t('traffic.disabled');
-    
+
     if (rulesSection) {
         rulesSection.classList.toggle('hidden', !state.trafficShaping.enabled);
     }
-    
+
     renderTrafficRules();
 }
 
 function renderTrafficRules() {
     const container = document.getElementById('traffic-rules-list');
     if (!container || !state.trafficShaping) return;
-    
+
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const rules = state.trafficShaping.rules || [];
-    
+
     if (rules.length === 0) {
         container.innerHTML = `<p class="text-center text-surface-500 py-4 text-sm">${t('traffic.no_rules')}</p>`;
         return;
     }
-    
+
     container.innerHTML = rules.map(rule => `
         <div class="flex items-center justify-between p-3 rounded-xl bg-surface-50 dark:bg-surface-800/50">
             <div class="flex items-center gap-3">
@@ -378,19 +378,19 @@ function renderTrafficRules() {
             </button>
         </div>
     `).join('');
-    
+
     initIcons();
 }
 
 async function toggleTrafficShaping() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const newState = document.getElementById('traffic-toggle').checked;
-    
+
     const data = await apiCall('/traffic/enable', {
         method: 'POST',
         body: JSON.stringify({ enabled: newState })
     });
-    
+
     if (data.success) {
         state.trafficShaping = data.data;
         updateTrafficUI();
@@ -409,7 +409,7 @@ function showAddTrafficRuleModal() {
     document.getElementById('traffic-rule-port').value = '';
     document.getElementById('traffic-rule-protocol').value = 'tcp';
     document.getElementById('traffic-rule-bandwidth').value = '1000';
-    
+
     const modal = document.getElementById('traffic-rule-modal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');
@@ -423,24 +423,24 @@ function closeTrafficModal() {
 
 async function saveTrafficRule() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     const rule = {
         name: document.getElementById('traffic-rule-name').value,
         port: document.getElementById('traffic-rule-port').value,
         protocol: document.getElementById('traffic-rule-protocol').value,
         bandwidth: parseInt(document.getElementById('traffic-rule-bandwidth').value)
     };
-    
+
     if (!rule.name || !rule.port) {
         showToast(t('toast.fill_required'), 'error');
         return;
     }
-    
+
     const data = await apiCall('/traffic/rules', {
         method: 'POST',
         body: JSON.stringify(rule)
     });
-    
+
     if (data.success) {
         showToast(t('common.save'), 'success');
         closeTrafficModal();
@@ -453,9 +453,9 @@ async function saveTrafficRule() {
 async function deleteTrafficRule(ruleId) {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     if (!confirm(t('traffic.delete_confirm'))) return;
-    
+
     const data = await apiCall(`/traffic/rules?id=${ruleId}`, { method: 'DELETE' });
-    
+
     if (data.success) {
         showToast(t('common.delete'), 'success');
         loadPhase3Settings();
@@ -465,11 +465,11 @@ async function deleteTrafficRule(ruleId) {
 // T010: System Integration
 function updateSystemUI() {
     if (!state.systemSettings) return;
-    
+
     const autoLaunchToggle = document.getElementById('autolaunch-toggle');
     const menubarToggle = document.getElementById('menubar-toggle');
     const shortcutDisplay = document.getElementById('current-shortcut');
-    
+
     if (autoLaunchToggle) autoLaunchToggle.checked = state.systemSettings.auto_launch;
     if (menubarToggle) menubarToggle.checked = state.systemSettings.menubar_enabled;
     if (shortcutDisplay) shortcutDisplay.textContent = state.systemSettings.global_shortcut;
@@ -478,16 +478,16 @@ function updateSystemUI() {
 async function toggleAutoLaunch() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const newState = document.getElementById('autolaunch-toggle').checked;
-    
+
     const data = await apiCall('/system/settings', {
         method: 'POST',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
             auto_launch: newState,
             menubar_enabled: state.systemSettings?.menubar_enabled || false,
             global_shortcut: state.systemSettings?.global_shortcut || 'Cmd+Shift+T'
         })
     });
-    
+
     if (data.success) {
         state.systemSettings = data.data;
         updateSystemUI();
@@ -498,16 +498,16 @@ async function toggleAutoLaunch() {
 async function toggleMenubar() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const newState = document.getElementById('menubar-toggle').checked;
-    
+
     const data = await apiCall('/system/settings', {
         method: 'POST',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
             auto_launch: state.systemSettings?.auto_launch || false,
             menubar_enabled: newState,
             global_shortcut: state.systemSettings?.global_shortcut || 'Cmd+Shift+T'
         })
     });
-    
+
     if (data.success) {
         state.systemSettings = data.data;
         updateSystemUI();
@@ -525,7 +525,7 @@ function recordShortcut() {
 
 async function detectWifi() {
     const data = await apiCall('/wifi/detect');
-    
+
     if (data.success) {
         state.currentSSID = data.data.ssid;
         state.matchingProfile = data.data.matching_profile;
@@ -538,13 +538,13 @@ async function detectWifi() {
 function updateWifiDetectionUI(data) {
     const container = document.getElementById('wifi-detection-section');
     if (!container) return;
-    
+
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const hasProfile = data.matching_profile !== null;
     const canAutoStart = data.can_auto_start;
-    
+
     container.classList.remove('hidden');
-    
+
     let actionButton = '';
     if (hasProfile && canAutoStart) {
         actionButton = `
@@ -570,7 +570,7 @@ function updateWifiDetectionUI(data) {
             </button>
         `;
     }
-    
+
     container.innerHTML = `
         <div class="glass-card rounded-2xl p-6 border-l-4 ${hasProfile ? 'border-emerald-400' : 'border-primary-400'}">
             <div class="flex items-center justify-between">
@@ -583,9 +583,9 @@ function updateWifiDetectionUI(data) {
                             ${data.ssid}
                         </h3>
                         <p class="text-sm text-surface-500 dark:text-surface-400">
-                            ${hasProfile 
-                                ? `${t('wifi.profile_found')}: ${data.matching_profile.name}` 
-                                : t('wifi.no_profile')}
+                            ${hasProfile
+            ? `${t('wifi.profile_found')}: ${data.matching_profile.name}`
+            : t('wifi.no_profile')}
                         </p>
                     </div>
                 </div>
@@ -598,7 +598,7 @@ function updateWifiDetectionUI(data) {
             </div>
         </div>
     `;
-    
+
     initIcons();
 }
 
@@ -613,7 +613,7 @@ async function scanWifiNetworks() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     showToast(t('wifi.scanning'), 'info');
     const data = await apiCall('/wifi/scan');
-    
+
     if (data.success && data.data.length > 0) {
         showWifiScanModal(data.data);
     } else {
@@ -623,7 +623,7 @@ async function scanWifiNetworks() {
 
 function showWifiScanModal(networks) {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     let modal = document.getElementById('wifi-scan-modal');
     if (!modal) {
         modal = document.createElement('div');
@@ -631,7 +631,7 @@ function showWifiScanModal(networks) {
         modal.className = 'fixed inset-0 z-50 hidden items-center justify-center modal-backdrop';
         document.body.appendChild(modal);
     }
-    
+
     const networksHtml = networks.map(net => `
         <div class="p-4 flex items-center justify-between hover:bg-surface-50 dark:hover:bg-surface-800/50 rounded-xl cursor-pointer transition-colors"
              onclick="selectWifiNetwork('${net.ssid}')">
@@ -642,12 +642,12 @@ function showWifiScanModal(networks) {
                     <p class="text-xs text-surface-500">Ch ${net.channel} • ${net.rssi} dBm</p>
                 </div>
             </div>
-            ${net.has_profile 
-                ? `<span class="px-2 py-1 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">${t('profiles.title')}</span>`
-                : '<i data-lucide="plus-circle" class="w-5 h-5 text-surface-400"></i>'}
+            ${net.has_profile
+            ? `<span class="px-2 py-1 rounded-full text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">${t('profiles.title')}</span>`
+            : '<i data-lucide="plus-circle" class="w-5 h-5 text-surface-400"></i>'}
         </div>
     `).join('');
-    
+
     modal.innerHTML = `
         <div class="glass-card rounded-2xl w-full max-w-md mx-4 animate-slide-up max-h-[80vh] flex flex-col">
             <div class="p-6 border-b border-surface-200 dark:border-surface-700 flex items-center justify-between">
@@ -661,7 +661,7 @@ function showWifiScanModal(networks) {
             </div>
         </div>
     `;
-    
+
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     initIcons();
@@ -684,13 +684,13 @@ async function autoStartFromProfile(profileId) {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const profile = state.profiles.find(p => p.id === profileId);
     if (!profile) return;
-    
+
     if (!state.password) {
         showToast(t('toast.password_required'), 'warning');
         showPage('dashboard');
         return;
     }
-    
+
     const data = await apiCall('/start', {
         method: 'POST',
         body: JSON.stringify({
@@ -699,7 +699,7 @@ async function autoStartFromProfile(profileId) {
             mtu: profile.mtu
         })
     });
-    
+
     if (data.success) {
         showToast(`${t('wifi.auto_start')}: ${profile.name}`, 'success');
         loadStatus();
@@ -713,13 +713,13 @@ async function autoStartFromProfile(profileId) {
 
 async function runSpeedTest() {
     if (state.isSpeedTesting) return;
-    
+
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     state.isSpeedTesting = true;
     const btn = document.getElementById('btn-speed-test');
     const originalContent = btn ? btn.innerHTML : '';
-    
+
     if (btn) {
         btn.innerHTML = `
             <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full spinner mr-2"></div>
@@ -727,17 +727,17 @@ async function runSpeedTest() {
         `;
         btn.disabled = true;
     }
-    
+
     showToast(t('speed.running'), 'info');
-    
+
     const data = await apiCall('/speed-test', { method: 'POST' });
-    
+
     state.isSpeedTesting = false;
     if (btn) {
         btn.innerHTML = originalContent;
         btn.disabled = false;
     }
-    
+
     if (data.success) {
         showToast(`${t('speed.download')}: ${data.download} Mbps`, 'success');
         state.speedTestHistory.push(data);
@@ -759,9 +759,9 @@ async function loadSpeedTestHistory() {
 function renderSpeedTestHistory() {
     const container = document.getElementById('speed-test-history');
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     if (!container) return;
-    
+
     if (state.speedTestHistory.length === 0) {
         container.innerHTML = `
             <div class="text-center py-8 text-surface-500 dark:text-surface-400">
@@ -772,13 +772,13 @@ function renderSpeedTestHistory() {
         initIcons();
         return;
     }
-    
+
     const recentTests = state.speedTestHistory.slice(-5).reverse();
-    
+
     container.innerHTML = recentTests.map(test => {
         const date = new Date(test.timestamp);
         const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
+
         return `
             <div class="flex items-center justify-between p-3 rounded-xl bg-surface-50 dark:bg-surface-800/50">
                 <div class="flex items-center gap-3">
@@ -799,29 +799,29 @@ function renderSpeedTestHistory() {
             </div>
         `;
     }).join('');
-    
+
     initIcons();
 }
 
 function updateSpeedChart() {
     const chartContainer = document.getElementById('speed-chart');
     if (!chartContainer || state.speedTestHistory.length === 0) return;
-    
+
     const recentTests = state.speedTestHistory.slice(-10);
     const maxSpeed = Math.max(...recentTests.map(t => t.download), 100);
-    
+
     chartContainer.innerHTML = `
         <div class="flex items-end justify-between h-32 gap-2">
             ${recentTests.map(test => {
-                const height = (test.download / maxSpeed) * 100;
-                return `
+        const height = (test.download / maxSpeed) * 100;
+        return `
                     <div class="flex-1 flex flex-col items-center gap-1">
                         <div class="w-full bg-primary-500/20 rounded-t-lg relative overflow-hidden" style="height: 100%;">
                             <div class="absolute bottom-0 w-full bg-primary-500 rounded-t-lg transition-all duration-500" style="height: ${height}%"></div>
                         </div>
                     </div>
                 `;
-            }).join('')}
+    }).join('')}
         </div>
     `;
 }
@@ -838,13 +838,13 @@ async function loadSessionStats() {
 
 function renderSessionStats() {
     if (!state.sessionStats) return;
-    
+
     const stats = state.sessionStats;
-    
+
     const totalSessionsEl = document.getElementById('stat-total-sessions');
     const totalTimeEl = document.getElementById('stat-total-time');
     const avgDurationEl = document.getElementById('stat-avg-duration');
-    
+
     if (totalSessionsEl) {
         totalSessionsEl.textContent = stats.total_sessions || 0;
     }
@@ -856,33 +856,33 @@ function renderSessionStats() {
         const minutes = Math.round(stats.avg_session_minutes || 0);
         avgDurationEl.textContent = `${minutes}m`;
     }
-    
+
     renderUsageChart(stats.daily_usage || {});
 }
 
 function renderUsageChart(dailyUsage) {
     const container = document.getElementById('usage-chart');
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     if (!container) return;
-    
+
     const dates = Object.keys(dailyUsage).sort().slice(-7);
     if (dates.length === 0) {
         container.innerHTML = `<p class="text-center text-surface-500 py-4">${t('stats.no_data')}</p>`;
         return;
     }
-    
+
     const maxUsage = Math.max(...Object.values(dailyUsage), 3600);
-    
+
     container.innerHTML = `
         <div class="flex items-end justify-between h-40 gap-3">
             ${dates.map(date => {
-                const usage = dailyUsage[date] || 0;
-                const hours = (usage / 3600).toFixed(1);
-                const height = Math.max((usage / maxUsage) * 100, 5);
-                const dayLabel = new Date(date).toLocaleDateString([], { weekday: 'short' });
-                
-                return `
+        const usage = dailyUsage[date] || 0;
+        const hours = (usage / 3600).toFixed(1);
+        const height = Math.max((usage / maxUsage) * 100, 5);
+        const dayLabel = new Date(date).toLocaleDateString([], { weekday: 'short' });
+
+        return `
                     <div class="flex-1 flex flex-col items-center gap-2">
                         <div class="w-full bg-gradient-to-t from-primary-600 to-primary-400 rounded-t-lg relative group cursor-pointer" style="height: ${height}%">
                             <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
@@ -892,7 +892,7 @@ function renderUsageChart(dailyUsage) {
                         <span class="text-xs text-surface-500">${dayLabel}</span>
                     </div>
                 `;
-            }).join('')}
+    }).join('')}
         </div>
     `;
 }
@@ -901,69 +901,66 @@ function renderUsageChart(dailyUsage) {
 
 function updateStatusUI(ttl, mtu, isCloaked, hasPassword) {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     const ttlValue = document.getElementById('ttl-value');
     const ttlBadge = document.getElementById('ttl-badge');
     const ttlIcon = document.getElementById('ttl-icon');
-    
+
     if (ttlValue) ttlValue.textContent = ttl;
     const isCloakedTTL = ttl === 65;
-    
+
     if (ttlBadge) {
         ttlBadge.innerHTML = `
             <span class="w-1.5 h-1.5 rounded-full ${isCloakedTTL ? 'bg-emerald-500' : 'bg-surface-400'}"></span>
             <span>${isCloakedTTL ? t('status.cloaked') : t('status.normal')}</span>
         `;
-        ttlBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-            isCloakedTTL ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
-        }`;
+        ttlBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isCloakedTTL ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
+            }`;
     }
-    
+
     if (ttlIcon) {
         ttlIcon.innerHTML = `<i data-lucide="${isCloakedTTL ? 'activity' : 'radio'}" class="w-6 h-6 ${isCloakedTTL ? 'text-emerald-500' : 'text-surface-400'}"></i>`;
     }
-    
+
     const mtuValue = document.getElementById('mtu-value');
     const mtuBadge = document.getElementById('mtu-badge');
     const mtuIcon = document.getElementById('mtu-icon');
-    
+
     if (mtuValue) mtuValue.textContent = mtu;
     const isCloakedMTU = mtu === 1400;
-    
+
     if (mtuBadge) {
         mtuBadge.innerHTML = `
             <span class="w-1.5 h-1.5 rounded-full ${isCloakedMTU ? 'bg-emerald-500' : 'bg-surface-400'}"></span>
             <span>${isCloakedMTU ? t('status.cloaked') : t('status.normal')}</span>
         `;
-        mtuBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-            isCloakedMTU ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
-        }`;
+        mtuBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isCloakedMTU ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
+            }`;
     }
-    
+
     if (mtuIcon) {
         mtuIcon.innerHTML = `<i data-lucide="${isCloakedMTU ? 'package' : 'box'}" class="w-6 h-6 ${isCloakedMTU ? 'text-emerald-500' : 'text-surface-400'}"></i>`;
     }
-    
+
     const cloakStatus = document.getElementById('cloak-status');
     const cloakBadge = document.getElementById('cloak-badge');
     const cloakIcon = document.getElementById('cloak-icon');
     const cloakBg = document.getElementById('cloak-bg');
-    
+
     if (cloakStatus) cloakStatus.textContent = isCloaked ? t('status.cloaked') : t('status.normal');
     if (cloakBadge) {
         cloakBadge.innerHTML = `
             <span class="w-1.5 h-1.5 rounded-full ${isCloaked ? 'bg-white animate-pulse' : 'bg-surface-400'}"></span>
             <span>${isCloaked ? t('status.active') : t('status.inactive')}</span>
         `;
-        cloakBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-            isCloaked ? 'bg-white/20 text-white' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
-        }`;
+        cloakBadge.className = `inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${isCloaked ? 'bg-white/20 text-white' : 'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-300'
+            }`;
     }
-    
+
     if (cloakIcon) {
         cloakIcon.innerHTML = `<i data-lucide="${isCloaked ? 'shield-check' : 'shield'}" class="w-6 h-6 ${isCloaked ? 'text-white' : 'text-surface-400'}"></i>`;
     }
-    
+
     if (cloakBg) {
         if (isCloaked) {
             cloakBg.classList.remove('opacity-0');
@@ -973,9 +970,9 @@ function updateStatusUI(ttl, mtu, isCloaked, hasPassword) {
             cloakBg.classList.add('opacity-0');
         }
     }
-    
+
     initIcons();
-    
+
     if (hasPassword) {
         state.password = 'saved';
         updatePasswordUI(true);
@@ -984,13 +981,13 @@ function updateStatusUI(ttl, mtu, isCloaked, hasPassword) {
 
 function updatePasswordUI(saved) {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     const section = document.getElementById('password-section');
     const status = document.getElementById('password-status');
     const clearBtn = document.getElementById('btn-clear-pwd');
     const startBtn = document.getElementById('btn-start');
     const stopBtn = document.getElementById('btn-stop');
-    
+
     if (saved) {
         if (section) {
             section.classList.remove('border-amber-400');
@@ -1021,7 +1018,7 @@ function updatePasswordUI(saved) {
 function togglePasswordVisibility() {
     const input = document.getElementById('password-input');
     const eye = document.getElementById('password-eye');
-    
+
     if (input.type === 'password') {
         input.type = 'text';
         eye.setAttribute('data-lucide', 'eye-off');
@@ -1036,17 +1033,17 @@ async function savePassword() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const input = document.getElementById('password-input');
     const password = input.value.trim();
-    
+
     if (!password) {
         showToast(t('password.error.empty'), 'error');
         return;
     }
-    
+
     const data = await apiCall('/save-password', {
         method: 'POST',
         body: JSON.stringify({ password })
     });
-    
+
     if (data.success) {
         state.password = password;
         updatePasswordUI(true);
@@ -1070,7 +1067,7 @@ async function startCloaking() {
         showToast(t('toast.password_required'), 'warning');
         return;
     }
-    
+
     const btn = document.getElementById('btn-start');
     btn.innerHTML = `
         <div class="absolute inset-0 bg-gradient-to-br from-emerald-500 to-green-600"></div>
@@ -1080,20 +1077,21 @@ async function startCloaking() {
         </div>
     `;
     btn.disabled = true;
-    
+
     const data = await apiCall('/start', { method: 'POST' });
-    
+
     if (data.success) {
         showToast(data.message, 'success');
         loadStatus();
         loadHistory();
     } else {
         showToast(data.error, 'error');
-        if (data.error && data.error.includes('password')) {
+        // 檢查是否是密碼錯誤（支援中英文）
+        if (data.error && (data.error.includes('password') || data.error.includes('密碼'))) {
             clearPassword();
         }
     }
-    
+
     resetStartButton();
 }
 
@@ -1103,7 +1101,7 @@ async function stopCloaking() {
         showToast(t('toast.password_required'), 'warning');
         return;
     }
-    
+
     const btn = document.getElementById('btn-stop');
     btn.innerHTML = `
         <div class="absolute inset-0 bg-gradient-to-br from-rose-500 to-red-600"></div>
@@ -1113,9 +1111,9 @@ async function stopCloaking() {
         </div>
     `;
     btn.disabled = true;
-    
+
     const data = await apiCall('/stop', { method: 'POST' });
-    
+
     if (data.success) {
         showToast(data.message, 'success');
         loadStatus();
@@ -1123,8 +1121,12 @@ async function stopCloaking() {
         loadSessionStats();
     } else {
         showToast(data.error, 'error');
+        // 檢查是否是密碼錯誤（支援中英文）
+        if (data.error && (data.error.includes('password') || data.error.includes('密碼'))) {
+            clearPassword();
+        }
     }
-    
+
     resetStopButton();
 }
 
@@ -1171,7 +1173,7 @@ function resetStopButton() {
 // Profile Management
 async function loadProfiles() {
     const data = await apiCall('/profiles');
-    
+
     if (data.success) {
         state.profiles = data.data;
         renderProfiles();
@@ -1181,7 +1183,7 @@ async function loadProfiles() {
 function renderProfiles() {
     const container = document.getElementById('profiles-list');
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     if (state.profiles.length === 0) {
         container.innerHTML = `
             <div class="p-12 text-center">
@@ -1195,7 +1197,7 @@ function renderProfiles() {
         initIcons();
         return;
     }
-    
+
     container.innerHTML = state.profiles.map(profile => `
         <div class="p-4 flex items-center justify-between hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors group">
             <div class="flex items-center gap-4">
@@ -1220,7 +1222,7 @@ function renderProfiles() {
             </div>
         </div>
     `).join('');
-    
+
     initIcons();
 }
 
@@ -1252,7 +1254,7 @@ function editProfile(id) {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     const profile = state.profiles.find(p => p.id === id);
     if (!profile) return;
-    
+
     document.getElementById('modal-title').textContent = t('profiles.edit');
     document.getElementById('profile-id').value = profile.id;
     document.getElementById('profile-name').value = profile.name;
@@ -1282,7 +1284,7 @@ function setupModalClose() {
             closeModal();
         }
     });
-    
+
     // Traffic rule modal close on backdrop click
     const trafficModal = document.getElementById('traffic-rule-modal');
     if (trafficModal) {
@@ -1304,20 +1306,20 @@ async function saveProfile() {
         mtu: parseInt(document.getElementById('profile-mtu').value),
         auto_start: document.getElementById('profile-auto').checked
     };
-    
+
     if (!profile.name || !profile.ssid) {
         showToast(t('toast.fill_required'), 'error');
         return;
     }
-    
+
     const endpoint = id ? `/profiles/${id}` : '/profiles';
     const method = id ? 'PUT' : 'POST';
-    
+
     const data = await apiCall(endpoint, {
         method,
         body: JSON.stringify(profile)
     });
-    
+
     if (data.success) {
         showToast(id ? t('profiles.updated') : t('profiles.created'), 'success');
         closeModal();
@@ -1331,9 +1333,9 @@ async function saveProfile() {
 async function deleteProfile(id) {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     if (!confirm(t('profiles.delete_confirm'))) return;
-    
+
     const data = await apiCall(`/profiles/${id}`, { method: 'DELETE' });
-    
+
     if (data.success) {
         showToast(t('profiles.deleted'), 'success');
         loadProfiles();
@@ -1344,7 +1346,7 @@ async function deleteProfile(id) {
 // History Management
 async function loadHistory() {
     const data = await apiCall('/history');
-    
+
     if (data.success) {
         state.history = data.data;
         renderHistory();
@@ -1354,7 +1356,7 @@ async function loadHistory() {
 function renderHistory() {
     const container = document.getElementById('history-list');
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
-    
+
     if (state.history.length === 0) {
         container.innerHTML = `
             <div class="p-12 text-center">
@@ -1368,15 +1370,15 @@ function renderHistory() {
         initIcons();
         return;
     }
-    
+
     const dateFormat = typeof i18n !== 'undefined' && i18n.currentLang === 'zh-TW' ? 'zh-TW' : 'en-US';
-    
+
     container.innerHTML = state.history.slice().reverse().map(item => {
         const date = new Date(item.timestamp);
         const timeStr = date.toLocaleString(dateFormat);
         const isStart = item.action === 'start_cloaking';
         const duration = item.details?.duration_seconds;
-        
+
         return `
             <div class="p-4 flex items-center justify-between hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
                 <div class="flex items-center gap-4">
@@ -1391,24 +1393,23 @@ function renderHistory() {
                         <p class="text-sm text-surface-500 dark:text-surface-400">${timeStr}</p>
                     </div>
                 </div>
-                <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                    item.success 
-                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' 
-                        : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
-                }">
+                <span class="px-3 py-1 rounded-full text-xs font-medium ${item.success
+                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
+                : 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
+            }">
                     ${item.success ? t('history.status.success') : t('history.status.failed')}
                 </span>
             </div>
         `;
     }).join('');
-    
+
     initIcons();
 }
 
 async function clearHistory() {
     const t = (key) => typeof i18n !== 'undefined' ? i18n.t(key) : key;
     if (!confirm(t('history.clear_confirm'))) return;
-    
+
     state.history = [];
     renderHistory();
     showToast(t('history.cleared'), 'success');
@@ -1417,7 +1418,7 @@ async function clearHistory() {
 // Settings
 function toggleAutoRefresh() {
     state.autoRefresh = document.getElementById('auto-refresh').checked;
-    
+
     if (state.autoRefresh) {
         startAutoRefresh();
     } else {
@@ -1454,7 +1455,7 @@ function refreshAll() {
 
 async function loadStatus() {
     const data = await apiCall('/status');
-    
+
     if (data.success) {
         const { ttl, mtu, is_cloaked, has_password, session_stats, dns_servers } = data.data;
         updateStatusUI(ttl, mtu, is_cloaked, has_password);
@@ -1466,7 +1467,7 @@ async function loadStatus() {
         if (dns_servers && dns_servers.length > 0) {
             const dnsContainer = document.getElementById('current-dns-servers');
             if (dnsContainer) {
-                dnsContainer.innerHTML = dns_servers.map(s => 
+                dnsContainer.innerHTML = dns_servers.map(s =>
                     `<span class="px-2 py-1 rounded-lg bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-surface-400 text-sm">${s}</span>`
                 ).join('');
             }
